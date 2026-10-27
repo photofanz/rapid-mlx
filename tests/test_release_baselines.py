@@ -372,6 +372,322 @@ def test_stress_consumer_reads_loaded_huggingface_revision(tmp_path):
     )
 
 
+def test_stress_consumer_reads_pinned_snapshot_without_main_ref(tmp_path, monkeypatch):
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "mlx-community/Qwen3.5-35B-A3B-8bit"
+    revision = resolve_revision(model_id)
+    assert revision is not None
+    snapshot = (
+        tmp_path / f"models--{model_id.replace('/', '--')}" / "snapshots" / revision
+    )
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text(json.dumps({"model_type": "qwen3"}))
+    (snapshot / "model.safetensors").write_bytes(b"weights")
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+    # A complete snapshot without an inventory cannot prove its identity.
+    monkeypatch.setattr("rapid_mlx._mirror._packaged_digest_info", lambda *a: None)
+
+    assert stress_e2e_bench._cached_model_revision(model_id) is None
+
+
+def test_stress_consumer_uses_selected_cache_for_pinned_snapshot(tmp_path, monkeypatch):
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "mlx-community/Qwen3.5-35B-A3B-8bit"
+    revision = resolve_revision(model_id)
+    cache = tmp_path / "selected"
+    snapshot = cache / f"models--{model_id.replace('/', '--')}" / "snapshots" / revision
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text('{"model_type":"qwen3"}')
+    (snapshot / "model.safetensors").write_bytes(b"weights")
+    monkeypatch.setattr(
+        "huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path / "default")
+    )
+    monkeypatch.setattr("rapid_mlx._mirror._packaged_digest_info", lambda *a: None)
+
+    assert stress_e2e_bench._cached_model_revision(model_id, cache_dir=cache) is None
+
+
+def test_stress_consumer_resolves_catalog_alias(tmp_path, monkeypatch):
+    from rapid_mlx.model_aliases import resolve_model, resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    alias = "qwen3.5-35b-8bit"
+    revision = resolve_revision(alias)
+    snapshot = (
+        tmp_path
+        / "models--mlx-community--Qwen3.5-35B-A3B-8bit"
+        / "snapshots"
+        / revision
+    )
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text('{"model_type":"qwen3"}')
+    (snapshot / "model.safetensors").write_bytes(b"weights")
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+    monkeypatch.setattr("rapid_mlx._mirror._packaged_digest_info", lambda *a: None)
+
+    assert resolve_model(alias) == "mlx-community/Qwen3.5-35B-A3B-8bit"
+    assert stress_e2e_bench._cached_model_revision(alias) is None
+
+
+@pytest.mark.parametrize("loaded_at_root", [False, True])
+def test_stress_consumer_accepts_pinned_subfolder(
+    tmp_path, monkeypatch, loaded_at_root
+):
+    from rapid_mlx import model_aliases
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "LiquidAI/LFM2.5-2.6B-MLX"
+    revision = resolve_revision(model_id)
+    checkpoint = (
+        tmp_path / "models--LiquidAI--LFM2.5-2.6B-MLX" / "snapshots" / revision / "4bit"
+    )
+    checkpoint.mkdir(parents=True)
+    (checkpoint / "config.json").write_text('{"model_type":"lfm2"}')
+    (checkpoint / "model.safetensors").write_bytes(b"weights")
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+    monkeypatch.setattr("rapid_mlx._mirror._packaged_digest_info", lambda *a: None)
+    original_resolve = model_aliases.resolve_model
+    loaded_path = checkpoint.parent if loaded_at_root else checkpoint
+
+    def loaded_model(name, *, include_external_roots=True):
+        if include_external_roots and name == model_id:
+            return str(loaded_path)
+        return original_resolve(name, include_external_roots=include_external_roots)
+
+    monkeypatch.setattr(model_aliases, "resolve_model", loaded_model)
+
+    assert model_aliases.resolve_model(model_id) == str(loaded_path)
+    assert stress_e2e_bench._cached_model_revision(model_id) is None
+
+
+@pytest.mark.parametrize("loaded_at_root", [False, True])
+def test_stress_consumer_verifies_only_the_loaded_subfolder(
+    tmp_path, monkeypatch, loaded_at_root
+):
+    from types import SimpleNamespace
+
+    from rapid_mlx import model_aliases
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "LiquidAI/LFM2.5-2.6B-MLX"
+    revision = resolve_revision(model_id)
+    checkpoint = (
+        tmp_path / "models--LiquidAI--LFM2.5-2.6B-MLX" / "snapshots" / revision / "4bit"
+    )
+    checkpoint.mkdir(parents=True)
+    import hashlib
+
+    config = b'{"model_type":"lfm2"}'
+    (checkpoint / "config.json").write_bytes(config)
+    (checkpoint / "model.safetensors").write_bytes(b"weights")
+    files = [
+        SimpleNamespace(
+            rfilename="4bit/config.json",
+            size=len(config),
+            lfs=None,
+            blob_id=hashlib.sha1(
+                b"blob " + str(len(config)).encode() + b"\0" + config
+            ).hexdigest(),
+        ),
+        SimpleNamespace(
+            rfilename="4bit/model.safetensors",
+            size=7,
+            lfs=SimpleNamespace(sha256=hashlib.sha256(b"weights").hexdigest()),
+            blob_id=None,
+        ),
+    ]
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+    # Digests cover only the subfolder, so a root load cannot be proven.
+    monkeypatch.setattr(
+        "rapid_mlx._mirror._packaged_digest_info",
+        lambda *a: SimpleNamespace(siblings=files),
+    )
+    original_resolve = model_aliases.resolve_model
+    loaded_path = checkpoint.parent if loaded_at_root else checkpoint
+
+    def loaded_model(name, *, include_external_roots=True):
+        if include_external_roots and name == model_id:
+            return str(loaded_path)
+        return original_resolve(name, include_external_roots=include_external_roots)
+
+    monkeypatch.setattr(model_aliases, "resolve_model", loaded_model)
+
+    expected = None if loaded_at_root else revision
+    assert stress_e2e_bench._cached_model_revision(model_id) == expected
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "valid",
+        "regular",
+        "stale",
+        "missing",
+        "corrupt_git",
+        "corrupt_lfs",
+        "empty",
+        "uncovered",
+        "linked_dir",
+    ],
+)
+def test_stress_consumer_checks_pinned_blob_identity(tmp_path, monkeypatch, case):
+    from types import SimpleNamespace
+
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    alias = "qwen3.5-35b-8bit"
+    revision = resolve_revision(alias)
+    repo = tmp_path / "models--mlx-community--Qwen3.5-35B-A3B-8bit"
+    snapshot = repo / "snapshots" / revision
+    blobs = repo / "blobs"
+    snapshot.mkdir(parents=True)
+    blobs.mkdir()
+    import hashlib
+
+    config = b'{"model_type":"qwen3"}'
+    config_digest = hashlib.sha1(
+        b"blob " + str(len(config)).encode() + b"\0" + config
+    ).hexdigest()
+    weight_digest = hashlib.sha256(b"weights").hexdigest()
+    (blobs / config_digest).write_text('{"model_type":"qwen3"}')
+    (blobs / weight_digest).write_bytes(b"weights")
+    if case == "corrupt_git":
+        (blobs / config_digest).write_bytes(config.replace(b"qwen3", b"qwen4"))
+    if case == "corrupt_lfs":
+        (blobs / weight_digest).write_bytes(b"corrupt")
+    stale_blob = blobs / ("c" * 64)
+    stale_blob.write_bytes(b"weights")
+    (snapshot / "config.json").symlink_to(blobs / config_digest)
+    (snapshot / "model.safetensors").symlink_to(
+        stale_blob if case == "stale" else blobs / weight_digest
+    )
+    if case == "regular":
+        (snapshot / "config.json").unlink()
+        (snapshot / "config.json").write_bytes(config)
+        (snapshot / "model.safetensors").unlink()
+        (snapshot / "model.safetensors").write_bytes(b"weights")
+    files = [
+        SimpleNamespace(
+            rfilename="config.json",
+            size=(blobs / config_digest).stat().st_size,
+            lfs=None,
+            blob_id=config_digest,
+        ),
+        SimpleNamespace(
+            rfilename="model.safetensors",
+            size=7,
+            lfs=SimpleNamespace(sha256=weight_digest),
+            blob_id=None,
+        ),
+    ]
+    if case == "missing":
+        files.append(
+            SimpleNamespace(
+                rfilename="tokenizer.json", size=1, lfs=None, blob_id="d" * 40
+            )
+        )
+    if case == "empty":
+        files = []
+    if case == "uncovered":
+        (snapshot / "extra.py").write_text("pass\n")
+    if case == "linked_dir":
+        outside = tmp_path / "outside"
+        outside.mkdir()
+        (outside / "extra.py").write_text("pass\n")
+        (snapshot / "extra").symlink_to(outside, target_is_directory=True)
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+    monkeypatch.setattr(
+        "rapid_mlx._mirror._packaged_digest_info",
+        lambda *a: SimpleNamespace(siblings=files),
+    )
+
+    if case in ("empty", "uncovered", "linked_dir"):
+        # Loaded files without a packaged digest cannot prove the revision.
+        assert stress_e2e_bench._cached_model_revision(alias) is None
+    elif case not in ("valid", "regular"):
+        with pytest.raises(ValueError, match="does not match packaged blob"):
+            stress_e2e_bench._cached_model_revision(alias)
+    else:
+        assert stress_e2e_bench._cached_model_revision(alias) == revision
+
+
+def test_stress_consumer_rejects_external_root_despite_empty_pinned_snapshot(
+    tmp_path, monkeypatch
+):
+    from rapid_mlx.model_aliases import resolve_model, resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "mlx-community/Qwen3.5-35B-A3B-8bit"
+    revision = resolve_revision(model_id)
+    assert revision is not None
+    cache = tmp_path / "cache"
+    (cache / f"models--{model_id.replace('/', '--')}" / "snapshots" / revision).mkdir(
+        parents=True
+    )
+    external = tmp_path / "external"
+    checkpoint = external / model_id
+    checkpoint.mkdir(parents=True)
+    (checkpoint / "config.json").write_text(json.dumps({"model_type": "qwen3"}))
+    (checkpoint / "model.safetensors").write_bytes(b"other weights")
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(cache))
+    monkeypatch.setenv("RAPID_MLX_EXTRA_MODEL_ROOTS", str(external))
+
+    assert resolve_model(model_id) == str(checkpoint)
+    with pytest.raises(ValueError, match="cannot verify loaded revision"):
+        stress_e2e_bench._cached_model_revision(model_id)
+
+
+def test_stress_consumer_rejects_cross_repo_leaf_symlinks(tmp_path, monkeypatch):
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "mlx-community/Qwen3.5-35B-A3B-8bit"
+    revision = resolve_revision(model_id)
+    assert revision is not None
+    snapshot = (
+        tmp_path / f"models--{model_id.replace('/', '--')}" / "snapshots" / revision
+    )
+    snapshot.mkdir(parents=True)
+    other = tmp_path / "models--other--repo" / "blobs"
+    other.mkdir(parents=True)
+    (other / "config.json").write_text(json.dumps({"model_type": "qwen3"}))
+    (other / "model.safetensors").write_bytes(b"other weights")
+    (snapshot / "config.json").symlink_to(other / "config.json")
+    (snapshot / "model.safetensors").symlink_to(other / "model.safetensors")
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+
+    with pytest.raises(ValueError, match="cannot verify loaded revision"):
+        stress_e2e_bench._cached_model_revision(model_id)
+
+
+def test_stress_consumer_rejects_wrong_pinned_snapshot(tmp_path, monkeypatch):
+    from rapid_mlx.model_aliases import resolve_revision
+    from scripts.pr_validate.steps import stress_e2e_bench
+
+    model_id = "mlx-community/Qwen3.5-35B-A3B-8bit"
+    revision = resolve_revision(model_id)
+    assert revision is not None
+    wrong_revision = "a" * 40 if revision != "a" * 40 else "b" * 40
+    snapshot = (
+        tmp_path
+        / f"models--{model_id.replace('/', '--')}"
+        / "snapshots"
+        / wrong_revision
+    )
+    snapshot.mkdir(parents=True)
+    monkeypatch.setattr("huggingface_hub.constants.HF_HUB_CACHE", str(tmp_path))
+
+    with pytest.raises(ValueError, match="cannot verify loaded revision"):
+        stress_e2e_bench._cached_model_revision(model_id, cache_dir=tmp_path)
+
+
 @pytest.mark.parametrize("contents", [None, "main", "a" * 39])
 def test_stress_consumer_rejects_unverifiable_revision(tmp_path, contents):
     from scripts.pr_validate.steps import stress_e2e_bench

@@ -1578,6 +1578,16 @@ def _run_bench(ctx: Context, choice: ModelChoice) -> dict[str, Any]:
     actual_revision = (
         _cached_model_revision(choice.model_id) if baseline_revision else None
     )
+    if baseline_revision and actual_revision is None:
+        return {
+            "status": "skip",
+            "summary": (
+                f"cold={cold:.0f}ms warm={warm:.0f}ms ({speedup:.2f}x) "
+                "— loaded model revision is unverifiable; baseline comparison skipped"
+            ),
+            "artifact": str(bench_path),
+            "executed": True,
+        }
     current_chip = _current_chip() if baseline_chip else None
     if baseline_revision != actual_revision:
         return {
@@ -1709,14 +1719,113 @@ def _load_benchmark_baseline(
     )
 
 
-def _cached_model_revision(model_id: str, *, cache_dir: Path | None = None) -> str:
+def _cached_model_revision(
+    model_id: str, *, cache_dir: Path | None = None
+) -> str | None:
     """Return the revision resolved by Hugging Face for the loaded model."""
+
+    from rapid_mlx.model_aliases import (
+        resolve_hub_model,
+        resolve_model,
+        resolve_revision,
+        resolve_subfolder,
+        subfolder_allow_patterns,
+    )
 
     if cache_dir is None:
         from huggingface_hub.constants import HF_HUB_CACHE
 
         cache_dir = Path(HF_HUB_CACHE)
-    ref = cache_dir / f"models--{_safe_name(model_id)}" / "refs" / "main"
+    repo_id = resolve_hub_model(model_id)
+    repo_cache = cache_dir / f"models--{_safe_name(repo_id)}"
+    pinned_revision = resolve_revision(model_id)
+    if pinned_revision is not None:
+        from rapid_mlx.model_metadata import resolve_pinned_cached_snapshot
+
+        # The server resolves external roots before selecting a Hub checkpoint.
+        # A cache directory cannot prove the revision of a different local load.
+        snapshot = repo_cache / "snapshots" / pinned_revision
+        subfolder = resolve_subfolder(model_id)
+        checkpoint = snapshot / subfolder if subfolder else snapshot
+        resolved = resolve_model(model_id)
+        cached = resolve_pinned_cached_snapshot(
+            model_id, checkpoint_subfolder=subfolder, cache_dir=cache_dir
+        )
+        if (
+            Path(resolved).exists()
+            and Path(resolved).resolve()
+            not in (snapshot.resolve(), checkpoint.resolve())
+        ) or cached != checkpoint:
+            raise ValueError(
+                f"cannot verify loaded revision for {model_id}: "
+                f"resolved {resolved}, pinned snapshot {checkpoint} is unavailable or incomplete"
+            )
+        if (
+            subfolder
+            and Path(resolved).exists()
+            and Path(resolved).resolve() != checkpoint.resolve()
+        ):
+            # A root load may read files outside the checkpoint subfolder whose
+            # digests are verified below; that identity cannot be proven.
+            return None
+        # The snapshot directory name alone does not identify its leaves: an old
+        # blob can be linked into a new snapshot. Covered mirrored aliases have
+        # packaged digests; verify selected leaves against their contents. Uncovered
+        # models have no independent proof of identity.
+        from rapid_mlx._mirror import (
+            _git_blob_oid,
+            _packaged_digest_info,
+            _sha256_digest,
+        )
+
+        info = _packaged_digest_info(
+            repo_id, pinned_revision, subfolder_allow_patterns(model_id)
+        )
+        if info is None:
+            return None
+        covered = {file.rfilename for file in info.siblings}
+        entries = list(checkpoint.rglob("*"))
+        loaded = {
+            leaf.relative_to(snapshot).as_posix() for leaf in entries if leaf.is_file()
+        }
+        # rglob does not descend into linked directories, whose files would
+        # then escape the coverage check; Hub snapshots never contain them.
+        linked_dir = any(leaf.is_symlink() and leaf.is_dir() for leaf in entries)
+        if linked_dir or not loaded or not loaded <= covered:
+            # Files without a packaged digest could differ from the pinned
+            # revision, so the loaded checkpoint cannot be identified.
+            return None
+        for file in info.siblings:
+            digest = file.lfs.sha256 if file.lfs is not None else file.blob_id
+            leaf = snapshot / file.rfilename
+            blob = repo_cache / "blobs" / digest
+            try:
+                # The snapshot link must name the canonical HF blob. The
+                # blob itself may link onward into the shared Hub store.
+                valid_link = not leaf.is_symlink() or (
+                    Path(os.path.abspath(leaf.parent / leaf.readlink())) == blob
+                    and leaf.resolve(strict=True) == blob.resolve(strict=True)
+                )
+                valid = (
+                    valid_link
+                    and leaf.stat().st_size == file.size
+                    and (
+                        _sha256_digest(leaf)
+                        if file.lfs is not None
+                        else _git_blob_oid(leaf)
+                    )
+                    == digest
+                )
+            except (OSError, ValueError):
+                valid = False
+            if not valid:
+                raise ValueError(
+                    f"cannot verify loaded revision for {model_id}: "
+                    f"{leaf} does not match packaged blob {digest}"
+                )
+        return pinned_revision
+
+    ref = repo_cache / "refs" / "main"
     try:
         revision = ref.read_text().strip()
     except OSError as exc:
