@@ -634,6 +634,8 @@ struct ChatView: View {
                         message: ChatView.transcriptPresentationMessage(message),
                         isStreaming: viewModel.isStreaming,
                         toolResults: toolResults,
+                        ownerApprovals: viewModel.ownerApprovals,
+                        onOwnerApproval: { viewModel.resolveOwnerPermission(opID: $0, allow: $1) },
                         assistantHasContent: message.role == .assistant
                             ? !message.content.isEmpty
                             : nil,
@@ -673,7 +675,7 @@ struct ChatView: View {
                         // actually pressed gave no feedback whatsoever. It now
                         // dims and carries the Send tooltip's sentence, which
                         // is the pattern ``sendOrStopButton`` already uses.
-                        retryEnabled: readiness.sendAllowed,
+                        retryEnabled: readiness.sendAllowed && !viewModel.isOwnerBackedChat,
                         retryTooltip: readiness.sendTooltip,
                         // Switching branches replays no turn, so unlike Edit
                         // and Retry it deliberately does NOT go through
@@ -1343,7 +1345,7 @@ struct ChatView: View {
     private var sendEnabled: Bool {
         hasDraft && (readiness.sendAllowed || readiness.startAndSendAlias != nil)
             && viewModel.startAndSendIntent.pending == nil && !attachmentDraft.isImportingFiles
-            && (attachmentDraft.images.isEmpty || supportsImageInput)
+            && (viewModel.isOwnerBackedChat || attachmentDraft.images.isEmpty || supportsImageInput)
     }
 
     private var hasDraft: Bool {
@@ -1365,6 +1367,10 @@ struct ChatView: View {
 
     private func send() {
         guard viewModel.startAndSendIntent.pending == nil else { return }
+        if viewModel.isOwnerBackedChat && !attachmentDraft.images.isEmpty {
+            viewModel.send(draft, alias: alias, imageAttachments: attachmentDraft.images)
+            return
+        }
         if let target = readiness.startAndSendAlias {
             guard sendEnabled, !viewModel.isStreaming else { return }
             viewModel.startAndSendIntent.begin(
@@ -1803,6 +1809,8 @@ private struct MessageRow: View {
     /// Tool-result rows keyed by the ``ToolCall.id`` they answer. Used to
     /// pair each dispatched call with its outcome inside this row.
     var toolResults: [String: ChatMessage] = [:]
+    var ownerApprovals: [String: ChatViewModel.OwnerApproval] = [:]
+    var onOwnerApproval: (String, Bool) -> Void = { _, _ in }
     /// The authoritative body is deliberately not part of `message` while it
     /// streams. This one-bit projection changes only when content first lands.
     var assistantHasContent: Bool? = nil
@@ -2123,7 +2131,7 @@ private struct MessageRow: View {
             if let calls = message.toolCalls, !calls.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(calls) { call in
-                        ToolCallChip(call: call, result: toolResults[call.id])
+                        ToolCallChip(call: call, result: toolResults[call.id], approval: ownerApprovals[call.id], onApproval: onOwnerApproval)
                     }
                 }
             }
@@ -2490,6 +2498,12 @@ private struct MessageRow: View {
     }
 }
 
+/// Measures an approval preview at its collapsed and full heights.
+private struct OwnerPreviewHeightKey: PreferenceKey {
+    static let defaultValue: [String: CGFloat] = [:]
+    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) { value.merge(nextValue(), uniquingKeysWith: { _, new in new }) }
+}
+
 /// One dispatched tool call, with its arguments and (once it lands) its
 /// result behind a disclosure. Expanded while the tool is still running so
 /// the user sees what is happening; auto-collapses on success so a long
@@ -2498,6 +2512,8 @@ private struct MessageRow: View {
 private struct ToolCallChip: View {
     let call: ToolCall
     let result: ChatMessage?
+    var approval: ChatViewModel.OwnerApproval? = nil
+    var onApproval: (String, Bool) -> Void = { _, _ in }
 
     /// Deep-link channel into Settings. Optional so the chip still renders in
     /// any host that hasn't injected the router (previews, snapshot harness) —
@@ -2517,6 +2533,8 @@ private struct ToolCallChip: View {
     /// completed chip would be silently re-collapsed on the next body pass.
     @State private var userToggled: Bool = false
     @State private var manualExpanded: Bool = false
+    @State private var fullApprovalPreview = false
+    @State private var previewHeights: [String: CGFloat] = [:]
 
     private var expanded: Bool {
         if userToggled { return manualExpanded }
@@ -2645,6 +2663,59 @@ private struct ToolCallChip: View {
             .accessibilityLabel("Tool call \(call.function.name)")
             .accessibilityIdentifier("ToolCallChip.Toggle.\(call.id)")
 
+            if let approval {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(ChatTextSanitizer.sanitizeForDisplay(approval.title))
+                        .font(.rapid(size: 12, weight: .medium))
+                    Text(ChatTextSanitizer.sanitizeForDisplay(approval.summary))
+                        .font(.rapid(size: 11))
+                        .accessibilityIdentifier("OwnerApproval.Summary.\(approval.opID)")
+                    if !approval.preview.isEmpty {
+                        let preview = ChatTextSanitizer.sanitizeForDisplay(approval.preview)
+                        Text(preview)
+                            .font(.rapid(size: 11, design: .monospaced))
+                            .lineLimit(fullApprovalPreview ? nil : 12)
+                            .truncationMode(.tail)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background {
+                                VStack(spacing: 0) {
+                                    Text(preview).lineLimit(12).fixedSize(horizontal: false, vertical: true)
+                                        .background(GeometryReader { Color.clear.preference(key: OwnerPreviewHeightKey.self, value: ["limited": $0.size.height]) })
+                                    Text(preview).fixedSize(horizontal: false, vertical: true)
+                                        .background(GeometryReader { Color.clear.preference(key: OwnerPreviewHeightKey.self, value: ["full": $0.size.height]) })
+                                }
+                                .font(.rapid(size: 11, design: .monospaced))
+                                .fixedSize(horizontal: false, vertical: true)
+                                .hidden()
+                                .accessibilityHidden(true)
+                            }
+                            .onPreferenceChange(OwnerPreviewHeightKey.self) { previewHeights = $0 }
+                        if (previewHeights["full"] ?? 0) > (previewHeights["limited"] ?? 0) + 0.5 {
+                            Button(fullApprovalPreview ? "Show less" : "Show full preview") { fullApprovalPreview.toggle() }
+                                .accessibilityIdentifier("OwnerApproval.Expand.\(approval.opID)")
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 8)
+                HStack(spacing: 8) {
+                    if approval.unavailable {
+                        Text("Approval expired").font(.rapid(size: 11)).foregroundStyle(.secondary)
+                    }
+                    Button("Allow") { onApproval(approval.opID, true) }
+                        .accessibilityLabel("Allow \(call.function.name)")
+                        .accessibilityIdentifier("OwnerApproval.Allow.\(approval.opID)")
+                    Button("Deny") { onApproval(approval.opID, false) }
+                        .accessibilityLabel("Deny \(call.function.name)")
+                        .accessibilityIdentifier("OwnerApproval.Deny.\(approval.opID)")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(approval.unavailable)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 8)
+            }
             if expanded {
                 VStack(alignment: .leading, spacing: 6) {
                     Divider()

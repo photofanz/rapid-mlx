@@ -129,7 +129,10 @@ final class ChatViewModel {
     /// UUID on launch (opens to an empty "Ask anything"); ``persistActive``
     /// upserts under this id once the user sends.
     private(set) var activeConversationID = UUID() {
-        didSet { startAndSendIntent = StartAndSendIntent() }
+        didSet {
+            startAndSendIntent = StartAndSendIntent()
+            if oldValue != activeConversationID { ownerApprovals = [:] }
+        }
     }
 
     var startAndSendIntent = StartAndSendIntent()
@@ -152,6 +155,19 @@ final class ChatViewModel {
     /// would force every test that constructs a model to either
     /// inject a real URLSession or thread a mock through both layers.
     private var client: ChatStreamClient
+    private let chatBackendConfig: ChatBackendConfig
+    private let ownerWorkspace: URL
+    private let ownerClientFactory: (@Sendable () async throws -> any ChatTurnClient)?
+    private var ownerSessions: [UUID: OwnerChatSession] = [:]
+    private var ownerConnections: [UUID: ChatOwnerConnection] = [:]
+    struct OwnerApproval {
+        let opID: String
+        let title: String
+        let summary: String
+        let preview: String
+        let unavailable: Bool
+    }
+    private(set) var ownerApprovals: [String: OwnerApproval] = [:]
 
     /// Tool runner. An ``EmptyToolRegistry`` short-circuits the tool-call
     /// request shape (we send no ``tools:`` field and the server emits plain
@@ -407,6 +423,9 @@ final class ChatViewModel {
 
     init(
         client: ChatStreamClient = ChatStreamClient(),
+        chatBackendConfig: ChatBackendConfig? = nil,
+        ownerClientFactory: (@Sendable () async throws -> any ChatTurnClient)? = nil,
+        ownerWorkspace: URL = FileManager.default.homeDirectoryForCurrentUser,
         tools: any ToolRegistry = EmptyToolRegistry(),
         toolDefaults: UserDefaults = .standard,
         sampling: SamplingConfig? = nil,
@@ -420,6 +439,9 @@ final class ChatViewModel {
         documentCache: DocumentContentCache = .shared
     ) {
         self.client = client
+        self.chatBackendConfig = chatBackendConfig ?? ChatBackendConfig()
+        self.ownerClientFactory = ownerClientFactory
+        self.ownerWorkspace = ownerWorkspace
         self.tools = tools
         self.toolDefaults = toolDefaults
         self.sampling = sampling
@@ -568,7 +590,8 @@ final class ChatViewModel {
                     branchChoices: branchChoices,
                     createdAt: now,
                     updatedAt: now,
-                    customInstructions: Self.normalizedInstruction(conversationInstructions)
+                    customInstructions: Self.normalizedInstruction(conversationInstructions),
+                    backend: chatBackendConfig.chatBackend == .ownerV1 ? .ownerV1 : nil
                 ),
                 at: 0
             )
@@ -611,6 +634,21 @@ final class ChatViewModel {
     ///
     /// Folded into one helper so every navigation and replay path applies the
     /// same turn-scoped cancellation and rail cleanup.
+    /// Every discarded session's live turn is cancelled first: once its
+    /// transcript and approval controls are gone, the owner must not keep
+    /// running tools on the user's behalf.
+    private func discardOwnerSessions() {
+        let sessions = Array(ownerSessions.values)
+        ownerSessions.removeAll()
+        let connections = Array(ownerConnections.values)
+        ownerConnections.removeAll()
+        Task {
+            for session in sessions { try? await session.stop() }
+            for session in sessions { await session.close() }
+            for connection in connections { await connection.close() }
+        }
+    }
+
     private func cancelInflightWork() {
         inflight?.cancel()
         inflight = nil
@@ -1063,6 +1101,7 @@ final class ChatViewModel {
     func selectConversation(_ id: UUID) {
         saveDrafts()
         guard id != activeConversationID else { return }
+        discardOwnerSessions()
         cancelInflightWork()
         finaliseInterruptedLiveTurn()
         persistActive(touching: false)
@@ -1084,6 +1123,7 @@ final class ChatViewModel {
 
     /// Deletes a conversation and all document extracts in its full branch tree.
     func deleteConversation(_ id: UUID) {
+        if id == activeConversationID { discardOwnerSessions() }
         cancelTitleTask(for: id)
         var attachmentIDs: Set<UUID> = []
         if id == activeConversationID {
@@ -1257,6 +1297,7 @@ final class ChatViewModel {
     /// Start a fresh conversation — drops the transcript and any stale
     /// error banner. The in-flight stream (if any) is cancelled first.
     func newConversation() {
+        discardOwnerSessions()
         saveDrafts()
         cancelInflightWork()
         finaliseInterruptedLiveTurn()
@@ -1342,6 +1383,13 @@ final class ChatViewModel {
     /// Append the user message, open a placeholder assistant row, and
     /// kick off the streaming task. The text field clears immediately on
     /// the caller's side.
+    var isOwnerBackedChat: Bool {
+        if let conversation = conversations.first(where: { $0.id == activeConversationID }) {
+            return conversation.backend == .ownerV1
+        }
+        return chatBackendConfig.chatBackend == .ownerV1
+    }
+
     func send(
         _ text: String,
         alias: String,
@@ -1352,6 +1400,14 @@ final class ChatViewModel {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty || !imageAttachments.isEmpty || !fileAttachments.isEmpty else { return }
         guard !isStreaming else { return }
+        if isOwnerBackedChat && !chatBackendConfig.harnessEnabled {
+            lastError = "Turn on the experimental harness in Settings to continue this chat."
+            return
+        }
+        if isOwnerBackedChat && !imageAttachments.isEmpty {
+            lastError = "Images aren't supported in harness chats yet — turn off the harness to send images."
+            return
+        }
 
         // The reader has taken the wheel. Anything we were asking the model
         // on our own account stops now — it would land on a transcript that
@@ -1479,6 +1535,10 @@ final class ChatViewModel {
                 client.baseURL = ChatStreamClient.loopbackURL(port: server.activePort)
             }
 
+            if conversations.first(where: { $0.id == activeConversationID })?.backend == .ownerV1 {
+                await sendViaOwner(text: messages[placeholderIndex - 1].content, alias: alias, placeholderIndex: placeholderIndex, epoch: epoch)
+                return
+            }
             await self.runToolLoop(
                 alias: alias,
                 initialPlaceholder: placeholderIndex,
@@ -1488,6 +1548,110 @@ final class ChatViewModel {
                 conversationInstruction: chatInstruction,
                 memoryContext: memoryContext
             )
+        }
+    }
+
+    private func sendViaOwner(text: String, alias: String, placeholderIndex: Int, epoch: Int) async {
+        chatBackendConfig.onDisabled = { [weak self] in
+            guard let self else { return }
+            self.cancelInflightWork()
+            self.finaliseInterruptedLiveTurn()
+            self.persistActive()
+            self.conversationEpoch &+= 1
+            self.isStreaming = false
+            self.discardOwnerSessions()
+        }
+        let conversationID = activeConversationID
+        let placeholder = messages[placeholderIndex]
+        do {
+            let session: OwnerChatSession
+            if let existing = ownerSessions[conversationID] { session = existing }
+            else {
+                let storedID = conversations.first(where: { $0.id == conversationID })?.ownerConversationID
+                var newConnection: ChatOwnerConnection?
+                if let ownerClientFactory {
+                    session = OwnerChatSession(client: try await ownerClientFactory(), conversationID: storedID, workspace: ownerWorkspace)
+                } else {
+                    guard let connection = try await ChatOwnerConnection.connectIfEnabled(backend: .ownerV1) else { throw ChatOwnerConnectionError.ownerUnavailable }
+                    newConnection = connection
+                    session = OwnerChatSession(connection: connection, conversationID: storedID, workspace: ownerWorkspace)
+                }
+                guard epoch == conversationEpoch else { await newConnection?.close(); return }
+                if Task.isCancelled { await newConnection?.close(); finishStartupCancellation(placeholderIndex: placeholderIndex, epoch: epoch); persistActive(); return }
+                if let newConnection { ownerConnections[conversationID] = newConnection }
+                ownerSessions[conversationID] = session
+            }
+            let target = OwnerChatSession.Target(url: server.map { ChatStreamClient.loopbackURL(port: $0.activePort) } ?? client.baseURL, bearer: server?.activeBearer, model: alias)
+            let userFiles = messages.indices.contains(placeholderIndex - 1) ? messages[placeholderIndex - 1].fileAttachments : []
+            let attachments = userFiles.map { file in
+                (name: file.kind == .txt || file.kind == .csv ? file.filename : file.filename + ".txt", data: Data(file.extractedText.utf8))
+            }
+            try await session.submit(text: text, target: target, attachments: attachments) { [weak self] id in
+                await MainActor.run {
+                    guard let self, let index = self.conversations.firstIndex(where: { $0.id == conversationID }) else { return }
+                    self.conversations[index].ownerConversationID = id
+                    self.saveConversations()
+                }
+            }
+            if Task.isCancelled { try? await session.stop() }
+            let snapshots = await session.snapshots()
+            if let index = conversations.firstIndex(where: { $0.id == conversationID }) {
+                conversations[index].ownerConversationID = await session.ownerConversationID()
+                saveConversations()
+            }
+            for await snapshot in snapshots {
+                guard !Task.isCancelled, epoch == conversationEpoch else { break }
+                guard let projection = snapshot.projection else { continue }
+                ownerApprovals = ownerProjectionApprovals(projection, unavailable: snapshot.unavailablePermissions)
+                var rows = ownerProjectionMessages(projection, assistantID: placeholder.id, createdAt: placeholder.createdAt)
+                if case .failed(let message) = snapshot.state { rows[0].status = .failed; rows[0].errorMessage = message }
+                rows[0].parentID = placeholder.parentID
+                for i in rows.indices.dropFirst() { rows[i].parentID = rows[i - 1].id }
+                guard let index = messages.firstIndex(where: { $0.id == placeholder.id }) else { break }
+                messages.replaceSubrange(index..<messages.count, with: rows)
+                treeShapeVersion += 1
+                if snapshot.state == .finished { break }
+                if case .failed = snapshot.state { break }
+            }
+            guard epoch == conversationEpoch else { return }
+            if Task.isCancelled, let index = messages.firstIndex(where: { $0.id == placeholder.id }) {
+                var row = messages[index]; Self.finaliseCancellation(message: &row); updateMessage(at: index, with: row)
+            }
+            isStreaming = false
+            persistActive()
+        } catch {
+            guard epoch == conversationEpoch else { return }
+            if error is CancellationError {
+                finishStartupCancellation(placeholderIndex: placeholderIndex, epoch: epoch)
+                persistActive()
+                return
+            }
+            if let index = messages.firstIndex(where: { $0.id == placeholder.id }) {
+                var row = messages[index]; row.status = .failed; row.errorMessage = error.localizedDescription; updateMessage(at: index, with: row)
+            }
+            isStreaming = false
+            persistActive()
+        }
+    }
+
+    var _testingOwnerSessionCount: Int { ownerSessions.count }
+
+    func _testingOwnerProjection() async -> ChatTurnProjection? {
+        await ownerSessions[activeConversationID]?.snapshot().projection
+    }
+
+    func resolveOwnerPermission(opID: String, allow: Bool) {
+        guard let session = ownerSessions[activeConversationID] else { return }
+        let id = activeConversationID
+        lastError = nil
+        Task {
+            do { try await session.resolve(opID: opID, decision: allow ? .allow : .deny) }
+            catch {
+                if case OwnerChatSession.SessionError.permissionUnavailable = error { return }
+                let snapshot = await session.snapshot()
+                guard id == activeConversationID, !snapshot.unavailablePermissions.contains(opID) else { return }
+                lastError = "Couldn't send your approval — try again."
+            }
         }
     }
 
@@ -1654,6 +1818,17 @@ final class ChatViewModel {
     /// has produced so far. The placeholder transitions to ``.complete``
     /// with whatever bytes already arrived.
     func stop() {
+        if let session = ownerSessions[activeConversationID] {
+            let id = activeConversationID
+            Task {
+                do { try await session.stop() }
+                catch {
+                    guard id == activeConversationID else { return }
+                    lastError = "Couldn't confirm the stop — the harness may still be running this turn."
+                }
+            }
+            return
+        }
         cancelInflightWork()
     }
 
@@ -1668,6 +1843,7 @@ final class ChatViewModel {
     /// actor. The task's own cleanup remains harmless: it re-persists the same
     /// state if it ever gets to run.
     func stopAndPersist() {
+        discardOwnerSessions()
         saveDrafts()
         cancelInflightWork()
         guard isStreaming else { return }
@@ -2271,6 +2447,7 @@ final class ChatViewModel {
         alias: String,
         supportsImageInput: Bool? = nil
     ) -> Bool {
+        guard !isOwnerBackedChat else { return false }
         guard !isStreaming else { return false }
         guard let idx = messages.firstIndex(where: { $0.id == id && $0.role == .user }) else { return false }
         let imageAttachments = messages[idx].imageAttachments
@@ -2303,7 +2480,7 @@ final class ChatViewModel {
         alias: String,
         supportsImageInput: Bool? = nil
     ) {
-        guard !isStreaming, messages.indices.contains(userIndex) else { return }
+        guard !isOwnerBackedChat, !isStreaming, messages.indices.contains(userIndex) else { return }
         let userMessage = messages[userIndex]
         guard !userMessage.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 || !userMessage.imageAttachments.isEmpty
@@ -2347,6 +2524,7 @@ final class ChatViewModel {
         alias: String,
         supportsImageInput: Bool? = nil
     ) -> Bool {
+        guard !isOwnerBackedChat else { return false }
         guard !isStreaming else { return false }
         guard let assistantIndex = messages.firstIndex(where: {
             $0.id == id && $0.role == .assistant
@@ -2421,6 +2599,7 @@ final class ChatViewModel {
     /// are — exactly what the `‹ 2/3 ›` control renders. ``nil`` when the
     /// turn has no alternatives.
     func branchPosition(of id: UUID) -> (index: Int, count: Int)? {
+        guard !isOwnerBackedChat else { return nil }
         let tree = treeSnapshot()
         guard let anchor = branchAnchor(for: id, in: tree) else { return nil }
         let group = tree.childGroup(of: anchor.parentID)
@@ -2438,6 +2617,7 @@ final class ChatViewModel {
     /// wrong branch. The UI disables the control for the same reason.
     @discardableResult
     func selectBranch(at offset: Int, forSiblingOf id: UUID) -> Bool {
+        guard !isOwnerBackedChat else { return false }
         guard !isStreaming else { return false }
         let snapshot = treeSnapshot()
         // Resolve to the fork this row belongs to before indexing, so a tool
@@ -2585,6 +2765,7 @@ final class ChatViewModel {
     /// model. Surfaces a friendly error and bails without dropping the
     /// transcript tail if the new model fails to load.
     func regenerateLast(usingAlias newAlias: String) async {
+        guard !isOwnerBackedChat else { return }
         guard !isStreaming else { return }
         let trimmed = newAlias.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
