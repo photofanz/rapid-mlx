@@ -1052,7 +1052,10 @@ def test_jina_overflow_policy():
         engine.score("q" * 513, ["xa"])
 
 
-def test_jina_loads_transformers_projector_names(monkeypatch, tmp_path):
+@pytest.mark.parametrize("separate_projector", [False, True])
+def test_jina_loads_transformers_projector_names(
+    monkeypatch, tmp_path, separate_projector
+):
     import json
 
     import mlx.core as mx
@@ -1085,10 +1088,15 @@ def test_jina_loads_transformers_projector_names(monkeypatch, tmp_path):
         for k, v in tree_flatten(reference.parameters())
     }
     assert "projector.2.weight" in weights
+    if separate_projector:
+        projector = {
+            k: weights.pop(k) for k in list(weights) if k.startswith("projector.")
+        }
+        mx.save_safetensors(str(tmp_path / "projector.safetensors"), projector)
     mx.save_safetensors(str(tmp_path / "model.safetensors"), weights)
 
-    def load_tokenizer(path, *, tokenizer_config):
-        assert tokenizer_config["trust_remote_code"] is False
+    def load_tokenizer(path, *, tokenizer_config_extra):
+        assert tokenizer_config_extra["trust_remote_code"] is False
         return "tok", path
 
     monkeypatch.delenv("RAPID_MLX_TRUST_REMOTE_CODE", raising=False)
@@ -1123,6 +1131,7 @@ def test_jina_remote_download_and_bad_weight_layout(monkeypatch, tmp_path):
     with pytest.raises(rerank.UnsupportedRerankModelError, match="projector mismatch"):
         rerank._load_jina("org/remote-jina")
     assert seen == [("org/remote-jina", rerank._JINA3_FILES)]
+    assert "projector.safetensors" in seen[0][1]
 
 
 def test_engine_loads_listwise_markers_and_eos_padding(monkeypatch):
@@ -2043,12 +2052,15 @@ def test_local_jina_positive_checked_load(tmp_path, monkeypatch):
 
     def load(path, **kwargs):
         assert path == tmp_path
-        assert kwargs == {"get_model_classes": _jina_model_classes}
+        assert kwargs["get_model_classes"].func is _jina_model_classes
+        assert kwargs["get_model_classes"].keywords == {
+            "projector_path": tmp_path / "projector.safetensors"
+        }
         return model, {}
 
-    def load_tokenizer(path, tokenizer_config):
+    def load_tokenizer(path, tokenizer_config_extra):
         assert path == tmp_path
-        assert tokenizer_config == {"trust_remote_code": False}
+        assert tokenizer_config_extra == {"trust_remote_code": False}
         return tokenizer
 
     monkeypatch.setattr(mlx_lm.utils, "load_model", load)
