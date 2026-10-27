@@ -2598,12 +2598,16 @@
       "chars"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}</tool_call>Answer",
@@ -2615,10 +2619,10 @@
     },
     "main": {
       "content": "Answer",
-      "reasoning": "Answer",
+      "reasoning": "",
       "calls": [],
-      "first_content_index": 75,
-      "content_deltas": 1,
+      "first_content_index": 69,
+      "content_deltas": 6,
       "input_chunks": 74
     }
   },
@@ -2635,12 +2639,15 @@
       "whole"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}</tool_call>Answer",
@@ -2652,9 +2659,9 @@
     },
     "main": {
       "content": "Answer",
-      "reasoning": "Answer",
+      "reasoning": "",
       "calls": [],
-      "first_content_index": 2,
+      "first_content_index": 1,
       "content_deltas": 1,
       "input_chunks": 1
     }
@@ -2672,12 +2679,16 @@
       "seven"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}</tool_call>Answer",
@@ -2689,10 +2700,10 @@
     },
     "main": {
       "content": "Answer",
-      "reasoning": "Answer",
+      "reasoning": "",
       "calls": [],
-      "first_content_index": 12,
-      "content_deltas": 1,
+      "first_content_index": 10,
+      "content_deltas": 2,
       "input_chunks": 11
     }
   },
@@ -2709,12 +2720,16 @@
       "chars"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}</tool_call>Answer",
@@ -2731,15 +2746,15 @@
     },
     "main": {
       "content": "Answer",
-      "reasoning": "Answer",
+      "reasoning": "",
       "calls": [
         [
           "run_shell_command",
           {}
         ]
       ],
-      "first_content_index": 75,
-      "content_deltas": 1,
+      "first_content_index": 69,
+      "content_deltas": 6,
       "input_chunks": 74
     }
   },
@@ -2756,12 +2771,15 @@
       "whole"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}</tool_call>Answer",
@@ -2778,14 +2796,14 @@
     },
     "main": {
       "content": "Answer",
-      "reasoning": "Answer",
+      "reasoning": "",
       "calls": [
         [
           "run_shell_command",
           {}
         ]
       ],
-      "first_content_index": 2,
+      "first_content_index": 1,
       "content_deltas": 1,
       "input_chunks": 1
     }
@@ -2803,12 +2821,16 @@
       "seven"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}</tool_call>Answer",
@@ -2825,15 +2847,15 @@
     },
     "main": {
       "content": "Answer",
-      "reasoning": "Answer",
+      "reasoning": "",
       "calls": [
         [
           "run_shell_command",
           {}
         ]
       ],
-      "first_content_index": 12,
-      "content_deltas": 1,
+      "first_content_index": 10,
+      "content_deltas": 2,
       "input_chunks": 11
     }
   },
@@ -3002,7 +3024,8 @@
     "classification": "policy-sensitive",
     "confidence": "rule-reviewed",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "Example <tool_call> and  are literal markers.",
@@ -3013,15 +3036,18 @@
       "input_chunks": 55
     },
     "main": {
-      "content": "Example ",
-      "reasoning": "Example <tool_call> and  are literal markers.",
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
       "calls": [],
-      "first_content_index": 56,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 55
     },
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ]
   },
   {
@@ -3039,7 +3065,8 @@
     "classification": "policy-sensitive",
     "confidence": "rule-reviewed",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "Example <tool_call> and  are literal markers.",
@@ -3050,15 +3077,18 @@
       "input_chunks": 1
     },
     "main": {
-      "content": "Example ",
-      "reasoning": "Example <tool_call> and  are literal markers.",
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
       "calls": [],
-      "first_content_index": 2,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 1
     },
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ]
   },
   {
@@ -3076,7 +3106,8 @@
     "classification": "policy-sensitive",
     "confidence": "rule-reviewed",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "Example <tool_call> and  are literal markers.",
@@ -3087,15 +3118,18 @@
       "input_chunks": 8
     },
     "main": {
-      "content": "Example ",
-      "reasoning": "Example <tool_call> and  are literal markers.",
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
       "calls": [],
-      "first_content_index": 9,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 8
     },
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ]
   },
   {
@@ -3113,7 +3147,8 @@
     "classification": "policy-sensitive",
     "confidence": "rule-reviewed",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "Example <tool_call> and  are literal markers.",
@@ -3124,15 +3159,17 @@
       "input_chunks": 55
     },
     "main": {
-      "content": "Example ",
+      "content": "",
       "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
       "calls": [],
-      "first_content_index": 56,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 55
     },
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ]
   },
   {
@@ -3150,7 +3187,8 @@
     "classification": "policy-sensitive",
     "confidence": "rule-reviewed",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "Example <tool_call> and  are literal markers.",
@@ -3161,15 +3199,18 @@
       "input_chunks": 1
     },
     "main": {
-      "content": "Example ",
-      "reasoning": "Example <tool_call> and  are literal markers.",
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
       "calls": [],
-      "first_content_index": 2,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 1
     },
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ]
   },
   {
@@ -3187,7 +3228,8 @@
     "classification": "policy-sensitive",
     "confidence": "rule-reviewed",
     "reasons": [
-      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain."
+      "Revert #5267 and #5258 restores earlier parser policy; later merged marker-boundary fixes remain.",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "Example <tool_call> and  are literal markers.",
@@ -3198,15 +3240,17 @@
       "input_chunks": 8
     },
     "main": {
-      "content": "Example ",
+      "content": "",
       "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
       "calls": [],
-      "first_content_index": 9,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 8
     },
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ]
   },
   {
@@ -3370,12 +3414,15 @@
       "chars"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}</tool_call>",
@@ -3393,7 +3440,7 @@
       "input_chunks": 151
     },
     "main": {
-      "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "content": "",
       "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
       "calls": [
         [
@@ -3403,8 +3450,8 @@
           }
         ]
       ],
-      "first_content_index": 152,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 151
     }
   },
@@ -3421,12 +3468,15 @@
       "whole"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}</tool_call>",
@@ -3444,7 +3494,7 @@
       "input_chunks": 1
     },
     "main": {
-      "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "content": "",
       "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
       "calls": [
         [
@@ -3454,8 +3504,8 @@
           }
         ]
       ],
-      "first_content_index": 2,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 1
     }
   },
@@ -3472,12 +3522,15 @@
       "seven"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}</tool_call>",
@@ -3495,7 +3548,7 @@
       "input_chunks": 22
     },
     "main": {
-      "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "content": "",
       "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
       "calls": [
         [
@@ -3505,8 +3558,8 @@
           }
         ]
       ],
-      "first_content_index": 23,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 22
     }
   },
@@ -3523,12 +3576,15 @@
       "chars"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}</tool_call>",
@@ -3546,7 +3602,7 @@
       "input_chunks": 151
     },
     "main": {
-      "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "content": "",
       "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
       "calls": [
         [
@@ -3556,8 +3612,8 @@
           }
         ]
       ],
-      "first_content_index": 152,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 151
     }
   },
@@ -3574,12 +3630,15 @@
       "whole"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}</tool_call>",
@@ -3597,7 +3656,7 @@
       "input_chunks": 1
     },
     "main": {
-      "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "content": "",
       "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
       "calls": [
         [
@@ -3607,8 +3666,8 @@
           }
         ]
       ],
-      "first_content_index": 2,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 1
     }
   },
@@ -3625,12 +3684,15 @@
       "seven"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}</tool_call>",
@@ -3648,7 +3710,7 @@
       "input_chunks": 22
     },
     "main": {
-      "content": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "content": "",
       "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
       "calls": [
         [
@@ -3658,8 +3720,8 @@
           }
         ]
       ],
-      "first_content_index": 23,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 22
     }
   },
@@ -4670,12 +4732,16 @@
       "chars"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<|channel>thought\nSecret<channel|>Answer",
@@ -4686,11 +4752,11 @@
       "input_chunks": 40
     },
     "main": {
-      "content": "thought\nSecretAnswer",
-      "reasoning": "thought\nSecret<channel|>Answer",
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
       "calls": [],
-      "first_content_index": 41,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 40
     }
   },
@@ -4707,12 +4773,16 @@
       "whole"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<|channel>thought\nSecret<channel|>Answer",
@@ -4723,11 +4793,11 @@
       "input_chunks": 1
     },
     "main": {
-      "content": "thought\nSecretAnswer",
-      "reasoning": "thought\nSecretAnswer",
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
       "calls": [],
-      "first_content_index": 2,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 1
     }
   },
@@ -4744,12 +4814,16 @@
       "seven"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<|channel>thought\nSecret<channel|>Answer",
@@ -4760,11 +4834,11 @@
       "input_chunks": 6
     },
     "main": {
-      "content": "thought\nSecretAnswer",
-      "reasoning": "thought\nSecret<channel|>Answer",
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
       "calls": [],
-      "first_content_index": 7,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 6
     }
   },
@@ -4781,12 +4855,15 @@
       "chars"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<|channel>thought\nSecret<channel|>Answer",
@@ -4797,11 +4874,11 @@
       "input_chunks": 40
     },
     "main": {
-      "content": "thought\nSecretAnswer",
+      "content": "",
       "reasoning": "<|channel>thought\nSecret<channel|>Answer",
       "calls": [],
-      "first_content_index": 41,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 40
     }
   },
@@ -4818,12 +4895,16 @@
       "whole"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<|channel>thought\nSecret<channel|>Answer",
@@ -4834,11 +4915,11 @@
       "input_chunks": 1
     },
     "main": {
-      "content": "thought\nSecretAnswer",
-      "reasoning": "thought\nSecretAnswer",
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
       "calls": [],
-      "first_content_index": 2,
-      "content_deltas": 1,
+      "first_content_index": null,
+      "content_deltas": 0,
       "input_chunks": 1
     }
   },
@@ -4855,12 +4936,15 @@
       "seven"
     ],
     "changed_fields": [
-      "content"
+      "content",
+      "first_content_index",
+      "content_deltas"
     ],
     "classification": "intended-fix",
     "confidence": "policy-classified-not-correctness-proof",
     "reasons": [
-      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained"
+      "wire/channel cleanup and finalization policy (#5250/#5255/#5266/#5267); residual defects retained",
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
     ],
     "baseline": {
       "content": "<|channel>thought\nSecret<channel|>Answer",
@@ -4871,12 +4955,2334 @@
       "input_chunks": 6
     },
     "main": {
-      "content": "thought\nSecretAnswer",
+      "content": "",
       "reasoning": "<|channel>thought\nSecret<channel|>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 6
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": 40,
+      "content_deltas": 1,
+      "input_chunks": 39
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": 2,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
       "calls": [],
       "first_content_index": 7,
       "content_deltas": 1,
       "input_chunks": 6
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 6
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": 40,
+      "content_deltas": 1,
+      "input_chunks": 39
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 39
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": 2,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "plain",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Hello world. This is a streamed answer.",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": 7,
+      "content_deltas": 1,
+      "input_chunks": 6
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Hello world. This is a streamed answer.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 6
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "nested",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener, treat every closer as a reasoning control (#5271), and decode each tool envelope once for every surface; the answer after a nested block streams as separate deltas."
+    ],
+    "baseline": {
+      "content": "AnswerTail",
+      "reasoning": "Secret.Nested",
+      "calls": [],
+      "first_content_index": 1,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "AnswerTail",
+      "reasoning": "Secret.Nested",
+      "calls": [],
+      "first_content_index": 1,
+      "content_deltas": 2,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "nested",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener, treat every closer as a reasoning control (#5271), and decode each tool envelope once for every surface; the answer after a nested block streams as separate deltas."
+    ],
+    "baseline": {
+      "content": "AnswerTail",
+      "reasoning": "Secret.Nested",
+      "calls": [],
+      "first_content_index": 1,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "AnswerTail",
+      "reasoning": "Secret.Nested",
+      "calls": [],
+      "first_content_index": 1,
+      "content_deltas": 2,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "nested",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener, treat every closer as a reasoning control (#5271), and decode each tool envelope once for every surface; the answer after a nested block streams as separate deltas."
+    ],
+    "baseline": {
+      "content": "AnswerTail",
+      "reasoning": "Secret.Nested",
+      "calls": [],
+      "first_content_index": 1,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "AnswerTail",
+      "reasoning": "Secret.Nested",
+      "calls": [],
+      "first_content_index": 1,
+      "content_deltas": 2,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "native",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 81
+    },
+    "main": {
+      "content": "",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 81
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "native",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 81
+    },
+    "main": {
+      "content": "",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 81
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "native",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 81
+    },
+    "main": {
+      "content": "",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 81
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "promoted",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "Secret.",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 109
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "Secret.",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": 104,
+      "content_deltas": 6,
+      "input_chunks": 109
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "promoted",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "Secret.",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": 1,
+      "content_deltas": 1,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "promoted",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "Secret.",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 16
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "Secret.",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": 15,
+      "content_deltas": 2,
+      "input_chunks": 16
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": 71,
+      "content_deltas": 1,
+      "input_chunks": 70
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": 2,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": 11,
+      "content_deltas": 1,
+      "input_chunks": 10
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 10
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": 71,
+      "content_deltas": 1,
+      "input_chunks": 70
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 70
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value>Answer",
+      "calls": [],
+      "first_content_index": 2,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "orphan",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": 11,
+      "content_deltas": 1,
+      "input_chunks": 10
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<arg_key>command</arg_key><arg_value>pwd</arg_value></tool_call>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 10
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "malformed",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Answer",
+      "reasoning": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}Answer",
+      "calls": [
+        [
+          "run_shell_command",
+          "<malformed_json_arguments>{\"name\":\"run_shell_command\",\"arguments\":oops}"
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 74
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          "<malformed_json_arguments>{\"name\":\"run_shell_command\",\"arguments\":oops}"
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 74
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "malformed",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          "<malformed_json_arguments>{\"name\":\"run_shell_command\",\"arguments\":oops}"
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          "<malformed_json_arguments>{\"name\":\"run_shell_command\",\"arguments\":oops}"
+        ]
+      ],
+      "first_content_index": 1,
+      "content_deltas": 1,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "malformed",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "swer",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          "<malformed_json_arguments>{\"name\":\"run_shell_command\",\"arguments\":oops}"
+        ]
+      ],
+      "first_content_index": 11,
+      "content_deltas": 1,
+      "input_chunks": 11
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          "<malformed_json_arguments>{\"name\":\"run_shell_command\",\"arguments\":oops}"
+        ]
+      ],
+      "first_content_index": 10,
+      "content_deltas": 2,
+      "input_chunks": 11
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "malformed",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Answer",
+      "reasoning": "<tool_call>{\"name\":\"run_shell_command\",\"arguments\":oops}Answer",
+      "calls": [
+        [
+          "run_shell_command",
+          {}
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 74
+    },
+    "main": {
+      "content": "Answer",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          {}
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 74
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "literal",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Example <tool_call> and  are literal markers.",
+      "reasoning": "Example <tool_call> and  are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "literal",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "Example ",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "literal",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "literal",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "Example ",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 8
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 8
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "literal",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "literal",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "Example <tool_call> and  are literal markers.",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    },
+    "main": {
+      "content": "",
+      "reasoning": "Example <tool_call> and <|im_end|> are literal markers.",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 55
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "fenced",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "```json {\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}} ```",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 151
+    },
+    "main": {
+      "content": "",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 151
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "fenced",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "fenced",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "```json {\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}} ```",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 151
+    },
+    "main": {
+      "content": "",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 151
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "fenced",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "```json {\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}} ```",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```<tool_call>{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 151
+    },
+    "main": {
+      "content": "",
+      "reasoning": "```json\n{\"name\":\"run_shell_command\",\"arguments\":{\"command\":\"pwd\"}}\n```",
+      "calls": [
+        [
+          "run_shell_command",
+          {
+            "command": "pwd"
+          }
+        ]
+      ],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 151
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "assistantanalysisSecretassistantfinalAnswer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "assistantanalysisSecretassistantfinalAnswer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "<|start|>assistantanalysisSecret<|end|><|start|>assistantfinalAnswer<|return|>",
+      "calls": [],
+      "first_content_index": 123,
+      "content_deltas": 1,
+      "input_chunks": 122
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "assistantanalysisSecretassistantfinalAnswer",
+      "calls": [],
+      "first_content_index": 2,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "responses",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "<|start|>assistantanalysisSecretassistantfinalAnswer<|return|>",
+      "calls": [],
+      "first_content_index": 19,
+      "content_deltas": 1,
+      "input_chunks": 18
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 18
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": 123,
+      "content_deltas": 1,
+      "input_chunks": 122
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 122
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "assistantanalysisSecretassistantfinalAnswer",
+      "calls": [],
+      "first_content_index": 2,
+      "content_deltas": 1,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "harmony",
+      true,
+      "enabled",
+      "messages",
+      true,
+      "seven"
+    ],
+    "changed_fields": [
+      "content",
+      "first_content_index",
+      "content_deltas"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "assistantanalysisSecretassistantfinalAnswer",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": 19,
+      "content_deltas": 1,
+      "input_chunks": 18
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|start|>assistant<|channel|>analysis<|message|>Secret<|end|><|start|>assistant<|channel|>final<|message|>Answer<|return|>",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 18
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "gemma",
+      true,
+      "enabled",
+      "chat",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "thought\nSecretAnswer",
+      "reasoning": "thought\nSecretAnswer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 40
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 40
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "gemma",
+      true,
+      "enabled",
+      "chat",
+      true,
+      "whole"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "thought\nSecretAnswer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 1
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "gemma",
+      true,
+      "enabled",
+      "responses",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 40
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 40
+    }
+  },
+  {
+    "suite": "focused",
+    "key": [
+      "qwen3",
+      "hermes",
+      "gemma",
+      true,
+      "enabled",
+      "messages",
+      false,
+      "chars"
+    ],
+    "changed_fields": [
+      "content",
+      "reasoning"
+    ],
+    "classification": "intended-fix",
+    "confidence": "policy-classified-not-correctness-proof",
+    "reasons": [
+      "Selected owner (#5272/#5273/#5274): thinking-on Qwen tool requests start in reasoning, honor one opener and one closer, and decode each tool envelope once for every surface; foreign markers stay literal in their channel."
+    ],
+    "baseline": {
+      "content": "thought\nSecretAnswer",
+      "reasoning": "",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 40
+    },
+    "main": {
+      "content": "",
+      "reasoning": "<|channel>thought\nSecret<channel|>Answer",
+      "calls": [],
+      "first_content_index": null,
+      "content_deltas": 0,
+      "input_chunks": 40
     }
   }
 ]

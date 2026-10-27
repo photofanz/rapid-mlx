@@ -68,6 +68,34 @@ LFM2.5's native tool-envelope terminals produce control events in content and
 remain literal in reasoning. The existing tool parser receives the pythonic
 payload. Reset restores legacy parser configuration before the next stream.
 
+## Prompt-owned Qwen tool envelopes
+
+`PromptOutputOwner.for_request` also selects one owner for Qwen-family
+reasoning (`qwen3`, `hy_v3`, `hy3`) paired with a `<tool_call>` envelope parser
+(Hermes/Qwen JSON, Qwen XML, GLM 4.x) when the request declares tools, enables
+automatic tool choice, asks for thinking and sets no reasoning budget. Disabled
+tools, thinking-off templates and reasoning budgets keep their existing paths.
+
+Reasoning is lexed first; the start marker is honored once and a closer ends
+only an open block. Every closer outside an envelope is a reasoning control, as
+in the existing thinking parser, so a repeated closer is not answer text. A thinking request whose rendered prompt state is unknown
+starts in reasoning; there is no end-of-output rescue. A block the output
+opened resumes after an envelope; reasoning inherited from the prompt ends at
+the tool phase. Markers inside a JSON string or a markup argument value (GLM `<arg_value>`,
+Qwen XML `<parameter=...>`) are argument text; the decoder skips its own
+reasoning-tag stripping because reasoning is already separated. Each
+envelope, from reasoning or content, is one tool phase:
+its source span is decoded once by the configured parser's complete-output
+extractor and published as typed tool events, so every API mode receives the
+same calls through its existing structured-call lane. An envelope that yields
+no call stays verbatim (opener, body and closer) in the channel it arrived in,
+as does a partial envelope interrupted by a new opener outside an argument value,
+or by the closer of the reasoning block it interrupted, and an envelope still
+open at finish. A closed GLM argument list without its
+call opener is an unpublished parse failure (#5274). Routes' existing
+streaming markup filters still apply to that literal text. Buffered fields
+keep the existing trimmed normalization.
+
 Remaining migration work includes other families' reasoning parsers and think
 routers, content sanitizers, format-specific tool filters and fallback parsing,
 and API-specific tool serialization/validation. These remain active; this change
@@ -75,8 +103,8 @@ does not install a grammar dependency or introduce new request errors. The
 prompt-owner differential ledger records every change from v0.16.10, including
 unchanged Qwen control cases. The source comments identify the reference rules.
 
-A closing thinking marker without an open reasoning block remains literal output,
-matching the reference detector. Live acceptance must reject such model output;
+For Flint and LFM2.5, a closing thinking marker without an open reasoning
+block remains literal output, matching the reference detector. Live acceptance must reject such model output;
 the adapter does not hide it with a sanitizer.
 
 Existing non-reasoning control cleanup remains in place. Foreign marker spellings
