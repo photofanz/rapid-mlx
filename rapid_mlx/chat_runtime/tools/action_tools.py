@@ -165,19 +165,61 @@ async def kill_group(process):
     await process.wait()
 
 
+# Only operational variables are inherited; additional names require owner opt-in.
+_TERMINAL_ENV = frozenset(
+    {"PATH", "HOME", "USER", "LOGNAME", "LANG", "TERM", "SHELL", "TMPDIR"}
+)
+_TERMINAL_ENV_EXTRA = "RAPID_MLX_HARNESS_TERMINAL_ENV"
+
+
+def terminal_environment():
+    extra = {
+        name.strip() for name in os.environ.get(_TERMINAL_ENV_EXTRA, "").split(",")
+    }
+    env = {}
+    for name, value in os.environ.items():
+        upper = name.upper()
+        if (
+            name not in _TERMINAL_ENV
+            and not name.startswith("LC_")
+            and name not in extra
+        ):
+            continue
+        if (
+            upper == "DATABASE_URL"
+            or upper.startswith("AWS_")
+            or any(
+                word in upper
+                for word in (
+                    "KEY",
+                    "SECRET",
+                    "TOKEN",
+                    "PASSWORD",
+                    "PASSWD",
+                    "CREDENTIAL",
+                    "AUTH",
+                )
+            )
+        ):
+            continue
+        # URLs with userinfo can hide credentials under otherwise innocuous names.
+        authorities = value.split("//")[1:]
+        if any(
+            "@" in part.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
+            for part in authorities
+        ):
+            continue
+        env[name] = value
+    env.update(PYTHONUNBUFFERED="1", GIT_TERMINAL_PROMPT="0", PAGER="cat")
+    return env
+
+
 async def run_process(argv, workspace, timeout, emit, call_id):
     output = BoundedOutput()
     started = time.monotonic()
     # No stdin, no interactive shell, and a session/process group owned by this call.
-    env = {
-        k: v
-        for k, v in os.environ.items()
-        if not any(
-            word in k.upper()
-            for word in ("TOKEN", "SECRET", "PASSWORD", "API_KEY", "CREDENTIAL")
-        )
-    }
-    env.update(PYTHONUNBUFFERED="1", GIT_TERMINAL_PROMPT="0", PAGER="cat")
+    env = terminal_environment()
+    env["PWD"] = str(workspace)
     spawning = asyncio.create_task(
         asyncio.create_subprocess_exec(
             *argv,
