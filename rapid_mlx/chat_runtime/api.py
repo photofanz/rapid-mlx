@@ -19,7 +19,7 @@ from .events import Envelope, PermissionResponse, json_schema
 from .file_extraction import MAX_INPUT_BYTES
 from .file_worker import run_worker
 from .owner import CAPABILITIES, ClientLeases
-from .runtime import Runtime, TurnRequest
+from .runtime import ImageCapabilityError, Runtime, TurnRequest
 from .store import Conflict, Store
 
 PREFIX = "/v1/rapid/chat"
@@ -175,6 +175,12 @@ def create_app(
     async def missing(request, error):
         return JSONResponse({"detail": "Chat item not found"}, status_code=404)
 
+    @app.exception_handler(ImageCapabilityError)
+    async def image_capability_error(request, error):
+        return JSONResponse(
+            {"detail": {"code": error.code, "message": error.message}}, status_code=400
+        )
+
     @app.exception_handler(ValueError)
     async def invalid_value(request, error):
         return JSONResponse({"detail": "Invalid chat operation"}, status_code=400)
@@ -272,6 +278,8 @@ def create_app(
             status = {
                 "binary_unsupported": 415,
                 "image_unsupported": 415,
+                "image_invalid": 422,
+                "image_too_large": 413,
                 "document_unsupported": 415,
                 "file_too_large": 413,
                 "timeout": 504,
@@ -279,6 +287,10 @@ def create_app(
                 "document_invalid": 422,
             }.get(code, 422)
             raise HTTPException(status, error)
+        if result.get("kind") == "image":
+            return await store.put_attachment(
+                conversation_id, name, bytes(content), result["mime"]
+            )
         text = result["text"]
         return await store.put_attachment(conversation_id, name, text.encode("utf-8"))
 
