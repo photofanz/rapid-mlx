@@ -2260,11 +2260,11 @@ flow_fresh_install() {
         || die "the live main window did not enforce its 720x560 floor: $(jq -c .actual "$OUT/window-floor.json")"
 
     # Default-on activation follows launch policy application without a prompt.
-    # The sink receives session_start, first-chat success, and the tool card shown.
+    # The sink receives session_start and first-chat success; Chat has no tool card.
     start_model
     send_prompt "Say hello in one short sentence." "default-on-activation"
     wait_send_idle "$OUT/default-on-activation-complete.json"
-    assert_share_activation_requests default-on-activation first_chat_reply tool_card_shown
+    assert_share_activation_requests default-on-activation first_chat_reply
     [[ -f "$PERSONA/home/.rapid-mlx/activation_seen_desktop_first_chat_reply" ]] \
         || die "accepted first_chat_reply did not claim its once-per-install marker"
     cleanup_persona
@@ -2787,26 +2787,11 @@ flow_chat_restore() {
         sleep 0.2
         see_main "$OUT/chat-settled.json"
     done
-    wait_identifier Chat.AgentTip.CopyDetailsButton "$OUT/tool-card.json"
-    for _ in {1..60}; do
-        jq -e '[.data.ui_elements[]? | select((.identifier // "")
-               | startswith("Launch.Integration.Copy."))] | length == 9' \
-            "$OUT/tool-card.json" >/dev/null && break
-        sleep 0.1
-        see_main "$OUT/tool-card.json"
-    done
-    assert_tree_text "$OUT/tool-card.json" "Use this model in your tools"
-    jq -e '[.data.ui_elements[]? | select((.identifier // "")
-           | startswith("Launch.Integration.Copy."))] | length == 9' \
-        "$OUT/tool-card.json" >/dev/null || die "tool card must reuse all nine primary rows"
-    baseline chat-restore.answered "$OUT/tool-card.json"
-    press "$OUT/tool-card.json" Chat.AgentTip.CopyDetailsButton "$OUT/tool-card-copy.json"
-    local expected_api_url
-    expected_api_url="$(jq -sr '[.[] | select(.event == "server_started")] | last | "http://127.0.0.1:\(.port)/v1"' "$OUT/fake-events.jsonl")"
-    [[ "$(pbpaste)" == "$expected_api_url" ]] || die "tool card copied an invalid API base URL"
-    see_main "$OUT/tool-card-completed.json"
-    jq -e '[.data.ui_elements[]? | select(.identifier == "Chat.AgentTip.CopyDetailsButton")] | length == 0' \
-        "$OUT/tool-card-completed.json" >/dev/null || die "copy must retire the tool card"
+    # Chat stays a chat surface: tool connection lives on the Agent page only.
+    see_main "$OUT/chat-answered.json"
+    jq -e '[.data.ui_elements[]? | select((.identifier // "") | startswith("Chat.AgentTip."))] | length == 0' \
+        "$OUT/chat-answered.json" >/dev/null || die "chat must not show the tool connection card"
+    baseline chat-restore.answered "$OUT/chat-answered.json"
     press "$OUT/chat-settled.json" ChatView.ConversationInstructions "$OUT/conversation-instructions-open-press.json"
     wait_identifier ChatView.ConversationInstructions.Editor "$OUT/conversation-instructions-open.json"
     "$AX_DRIVER" set-value "$APP_PID" ChatView.ConversationInstructions.Editor \
@@ -2819,8 +2804,8 @@ flow_chat_restore() {
     dismiss_first_run
     wait_identifier Sidebar.NewChat "$OUT/chat-restored.json"
     assert_tree_text "$OUT/chat-restored.json" "golden restore marker"
-    jq -e '[.data.ui_elements[]? | select(.identifier == "Chat.AgentTip.CopyDetailsButton")] | length == 0' \
-        "$OUT/chat-restored.json" >/dev/null || die "completed tool card returned after relaunch"
+    jq -e '[.data.ui_elements[]? | select((.identifier // "") | startswith("Chat.AgentTip."))] | length == 0' \
+        "$OUT/chat-restored.json" >/dev/null || die "tool connection card appeared after relaunch"
     # Relaunch restarts the fake model too. Search results are a modal overlay
     # on the whole window, so its structural baseline otherwise races the
     # transient readiness band and residency controls behind the panel.
