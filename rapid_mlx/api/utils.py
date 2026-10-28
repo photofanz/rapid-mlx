@@ -6,6 +6,8 @@ Utility functions for text processing and model detection.
 import json
 import logging
 import re
+import threading
+import time
 from dataclasses import dataclass
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version
@@ -1337,7 +1339,7 @@ def is_mllm_model(model_name: str) -> bool:
         # Spark 2.5 is a causal text checkpoint whose MLX implementation
         # currently lives only in mlx-vlm. Route it through that loader even
         # though its config has no vision tower or multimodal architecture.
-        if config.get("model_type") == "spark2_5":
+        if config.get("model_type") in {"spark2_5", "lfm3_vl"}:
             return True
         if not _config_indicates_vlm(config):
             return False
@@ -1678,6 +1680,10 @@ def resolve_serving_lane_decision(
             return ServingLaneDecision(True, "vision_lane_forced")
         return ServingLaneDecision(False, "text_checkpoint")
 
+    from ..models.media_backend import native_media_model_type
+
+    if native_media_model_type(model_name):
+        return ServingLaneDecision(True, "vision_supported")
     cache_mode = mllm_backbone_cache_mode(model_name)
     if cache_mode == "arrays":
         if vision_min_memory_gb is None:
@@ -1742,9 +1748,13 @@ def resolve_serving_lane_decision(
 
 
 _DEGRADE_CONFIG_PREFETCHED: set[str] = set()
+_DEGRADE_CONFIG_ATTEMPTS: dict[str, float] = {}
+_DEGRADE_CONFIG_ATTEMPTS_LOCK = threading.Lock()
+_DEGRADE_CONFIG_INFLIGHT: dict[str, threading.Event] = {}
+_DEGRADE_CONFIG_RETRY_SECONDS = 60.0
 
 
-def _prefetch_config_for_degrade_probe(model_ref: str) -> None:
+def _prefetch_config_for_degrade_probe(model_ref: str) -> bool:
     """Pull only ``config.json`` (a few KB) for the text-degrade probes.
 
     The lane resolver and its probes are CACHE-ONLY (the
@@ -1758,36 +1768,88 @@ def _prefetch_config_for_degrade_probe(model_ref: str) -> None:
     * the fetch runs under :func:`call_with_deadline` with the shared
       ``_HF_RESOLVE_TIMEOUT_SECONDS`` — a deadline is the only thing that
       bounds a huggingface_hub metadata call;
-    * at most one attempt per process per repo — repeated probes never
-      refetch, so a slow or blackholed Hub costs a single bounded window.
+    * failed probes can retry after a bounded interval; concurrent probes
+      for the same repo are coalesced during that interval.
     """
     import os
 
     if os.path.exists(model_ref) or model_ref in _DEGRADE_CONFIG_PREFETCHED:
-        return
+        metadata = read_model_metadata(model_ref)
+        return bool(
+            metadata
+            and isinstance(metadata.config, dict)
+            and metadata.config.get("model_type")
+        )
     from .._download_gate import _HF_RESOLVE_TIMEOUT_SECONDS, call_with_deadline
     from ..model_metadata import hub_offline_mode_active
 
-    if hub_offline_mode_active():
-        return
     metadata = read_model_metadata(model_ref)
-    if metadata is not None and isinstance(metadata.config, dict):
+    if (
+        metadata is not None
+        and isinstance(metadata.config, dict)
+        and metadata.config.get("model_type")
+    ):
         # The routing probes are cache-only and already have all of the
         # evidence they can use.  Avoid turning every warm serve into a Hub
         # metadata request merely to re-materialize the same config.
-        return
-    _DEGRADE_CONFIG_PREFETCHED.add(model_ref)
+        return True
+    if hub_offline_mode_active():
+        return False
+    with _DEGRADE_CONFIG_ATTEMPTS_LOCK:
+        pending = _DEGRADE_CONFIG_INFLIGHT.get(model_ref)
+        if pending is None:
+            now = time.monotonic()
+            last = _DEGRADE_CONFIG_ATTEMPTS.get(model_ref)
+            if last is not None and now - last < _DEGRADE_CONFIG_RETRY_SECONDS:
+                return False
+            _DEGRADE_CONFIG_ATTEMPTS[model_ref] = now
+            pending = threading.Event()
+            _DEGRADE_CONFIG_INFLIGHT[model_ref] = pending
+            leader = True
+        else:
+            leader = False
+    if not leader:
+        pending.wait()
+        metadata = read_model_metadata(model_ref)
+        return bool(
+            metadata
+            and isinstance(metadata.config, dict)
+            and metadata.config.get("model_type")
+        )
     try:
+        from rapid_mlx.model_aliases import (
+            resolve_hub_model,
+            resolve_revision,
+            resolve_subfolder,
+        )
         from rapid_mlx.model_downloads import hf_hub_download
 
+        revision = resolve_revision(model_ref)
+        subfolder = resolve_subfolder(model_ref)
         call_with_deadline(
             hf_hub_download,
             _HF_RESOLVE_TIMEOUT_SECONDS,
-            model_ref,
-            "config.json",
+            resolve_hub_model(model_ref),
+            f"{subfolder}/config.json" if subfolder else "config.json",
+            **({"revision": revision} if revision else {}),
         )
+        metadata = read_model_metadata(model_ref)
+        available = bool(
+            metadata
+            and isinstance(metadata.config, dict)
+            and metadata.config.get("model_type")
+        )
+        if available:
+            _DEGRADE_CONFIG_PREFETCHED.add(model_ref)
+            with _DEGRADE_CONFIG_ATTEMPTS_LOCK:
+                _DEGRADE_CONFIG_ATTEMPTS.pop(model_ref, None)
+        return available
     except Exception:  # noqa: BLE001 - best-effort probe, never fatal
-        return
+        return False
+    finally:
+        with _DEGRADE_CONFIG_ATTEMPTS_LOCK:
+            _DEGRADE_CONFIG_INFLIGHT.pop(model_ref, None)
+            pending.set()
 
 
 def _text_lane_loads_model_type(model_type: str) -> bool:

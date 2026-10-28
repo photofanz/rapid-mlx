@@ -168,7 +168,7 @@ def test_base_install_gemma4_boots_text_only_with_warning(monkeypatch, capsys):
 
     # The boot guard materialized the config exactly once, for the profile's
     # hf_path, before the (cache-only) degrade probes ran.
-    assert fetched == ["mlx-community/gemma-4-26b-a4b-it-4bit"]
+    assert fetched == ["gemma-4-26b-4bit"]
 
     err = capsys.readouterr().err
     assert err.count("warning: vision runtime absent") == 1
@@ -200,8 +200,11 @@ def _cold_cache_with_boot_prefetch(monkeypatch, config) -> dict:
         return None
 
     def _boot_prefetch(repo):
+        from rapid_mlx.model_aliases import resolve_hub_model
+
         state["fetched"].append(repo)
         state["materialized"].add(repo)
+        state["materialized"].add(resolve_hub_model(repo))
 
     monkeypatch.setattr(model_metadata, "read_model_metadata", _read)
     monkeypatch.setattr(api_utils, "read_model_metadata", _read)
@@ -211,6 +214,22 @@ def _cold_cache_with_boot_prefetch(monkeypatch, config) -> dict:
         cli, "_prefetch_config_for_lane_guard", state["legacy_fetched"].append
     )
     return state
+
+
+def test_cold_renamed_native_repo_resolves_before_vision_probe(monkeypatch):
+    from rapid_mlx import cli
+    from rapid_mlx.models import mllm
+
+    repo = "example-org/renamed-checkpoint"
+    state = _cold_cache_with_boot_prefetch(monkeypatch, {"model_type": "lfm3_vl"})
+    _allow_desktop_warning(monkeypatch)
+    _stub_post_guard_sentinel(monkeypatch)
+    monkeypatch.setattr(
+        mllm, "vision_runtime_status", lambda: pytest.fail("vision runtime probed")
+    )
+    with pytest.raises(_ReachedPastVisionGuardError):
+        cli.serve_command(_args(repo))
+    assert state["fetched"] == [repo]
 
 
 def _pretend_mlx_lm_ships(monkeypatch, *module_types: str) -> None:
@@ -247,7 +266,7 @@ def test_base_install_gemma4_fresh_cache_degrades(monkeypatch, capsys):
     with pytest.raises(_ReachedPastVisionGuardError):
         cli.serve_command(_args("gemma-4-26b-4bit"))
 
-    assert state["fetched"] == ["mlx-community/gemma-4-26b-a4b-it-4bit"]
+    assert state["fetched"] == ["gemma-4-26b-4bit"]
     assert state["legacy_fetched"] == []
     err = capsys.readouterr().err
     assert err.count("warning: vision runtime absent") == 1
@@ -335,7 +354,7 @@ def test_base_install_direct_repo_unlisted_arch_keeps_guard(monkeypatch, capsys)
     assert "warning: vision runtime absent" not in err
 
 
-def test_catalog_text_model_never_prefetches_for_vision_degrade(monkeypatch):
+def test_catalog_text_model_skips_backend_prefetch(monkeypatch):
     """A known text-only catalog lane is not a VLM degrade candidate.
 
     In particular, a base-wheel text serve must reach the normal version /
@@ -542,7 +561,7 @@ def test_bonsai2_pack_still_requires_vision_extra(monkeypatch, capsys):
     assert "rapid-mlx==" in capsys.readouterr().err
     # The boot prefetch targets the profile's repo even when the probe then
     # fails closed (the pack is not text-capable) — once, and nothing more.
-    assert fetched == ["prism-ml/Ternary-Bonsai-2-27B-mlx-2bit"]
+    assert fetched == ["bonsai2-27b-2bit"]
 
 
 def test_degrade_probe_rejects_mllm_only_pack(monkeypatch):
@@ -596,8 +615,8 @@ def test_explicit_mllm_on_gemma4_still_requires_vision_extra(monkeypatch, capsys
         cli.serve_command(args)
     assert exc_info.value.code == 2
     assert capsys.readouterr().err.count("warning: vision runtime absent") == 0
-    # An explicit vision demand is never a degrade candidate: no prefetch.
-    assert fetched == []
+    # Backend selection still requires checkpoint metadata for explicit MLLM.
+    assert fetched == ["gemma-4-26b-4bit"]
 
 
 def test_desktop_sidecar_degrades_silently(monkeypatch, capsys):
@@ -863,7 +882,7 @@ def test_resolver_never_touches_the_network(monkeypatch):
 
 def test_degrade_probe_prefetch_bounded_once_and_exact_repo(monkeypatch):
     """The boot guard's prefetch: targets the exact repo's ``config.json``
-    only, under the shared Hub deadline, at most once per process — and Hub
+    only, under the shared Hub deadline; successful results are cached and Hub
     failures are swallowed (best-effort, never fatal)."""
     import huggingface_hub
 
@@ -886,6 +905,11 @@ def test_degrade_probe_prefetch_bounded_once_and_exact_repo(monkeypatch):
     monkeypatch.setattr(_download_gate, "call_with_deadline", _recording_deadline)
 
     calls = []
+    monkeypatch.setattr(
+        api_utils,
+        "read_model_metadata",
+        lambda _: _meta(GEMMA4_VLM_CONFIG) if calls else None,
+    )
 
     def _record(repo, filename, **kwargs):
         calls.append((repo, filename))
@@ -1030,3 +1054,112 @@ def test_degrade_probe_keys_on_top_level_model_type(monkeypatch):
         },
     )
     assert checkpoint_serves_text_without_vision("bonsai2-27b-2bit") is False
+
+
+def test_native_dispatch_prefetch_preserves_revision_and_subfolder(monkeypatch):
+    from rapid_mlx import model_aliases, model_downloads, model_metadata
+    from rapid_mlx.api import utils
+
+    monkeypatch.setattr(utils, "_DEGRADE_CONFIG_PREFETCHED", set())
+    monkeypatch.setattr(utils, "read_model_metadata", lambda _: None)
+    monkeypatch.setattr(model_metadata, "hub_offline_mode_active", lambda: False)
+    monkeypatch.setattr(model_aliases, "resolve_hub_model", lambda _: "org/repo")
+    monkeypatch.setattr(model_aliases, "resolve_revision", lambda _: "abc123")
+    monkeypatch.setattr(model_aliases, "resolve_subfolder", lambda _: "variant")
+    calls = []
+    monkeypatch.setattr(
+        model_downloads, "hf_hub_download", lambda *a, **kw: calls.append((a, kw))
+    )
+    assert not utils._prefetch_config_for_degrade_probe("alias")
+    assert calls == [(("org/repo", "variant/config.json"), {"revision": "abc123"})]
+
+
+def test_native_dispatch_retries_failed_config_download(monkeypatch):
+    from rapid_mlx import model_downloads, model_metadata
+    from rapid_mlx.api import utils
+
+    monkeypatch.setattr(utils, "_DEGRADE_CONFIG_PREFETCHED", set())
+    monkeypatch.setattr(model_metadata, "hub_offline_mode_active", lambda: False)
+    monkeypatch.setattr(utils, "_DEGRADE_CONFIG_ATTEMPTS", {})
+    clock = {"now": 100.0}
+    monkeypatch.setattr(utils.time, "monotonic", lambda: clock["now"])
+    state = {"calls": 0, "ready": False}
+    monkeypatch.setattr(
+        utils,
+        "read_model_metadata",
+        lambda _: _meta({"model_type": "lfm3_vl"}) if state["ready"] else None,
+    )
+
+    def download(*args, **kwargs):
+        state["calls"] += 1
+        if state["calls"] == 1:
+            raise TimeoutError("temporary failure")
+        state["ready"] = True
+
+    monkeypatch.setattr(model_downloads, "hf_hub_download", download)
+    assert not utils._prefetch_config_for_degrade_probe("org/repo")
+    assert not utils._prefetch_config_for_degrade_probe("org/repo")
+    assert state["calls"] == 1
+    clock["now"] += utils._DEGRADE_CONFIG_RETRY_SECONDS
+    assert utils._prefetch_config_for_degrade_probe("org/repo")
+    assert state["calls"] == 2
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [{"spec_decode": "dflash"}, {"enable_mtp": True}, {"force_spec_decode": True}],
+)
+def test_speculative_direct_repo_skips_boot_prefetch(monkeypatch, flags):
+    from rapid_mlx import _version_check, cli
+
+    fetched = _stub_boot_prefetch(monkeypatch)
+    monkeypatch.setattr(cli, "_normalize_speculative_config_or_exit", lambda args: None)
+    _mock_vision_absent(monkeypatch)
+    _patch_lane_probes(monkeypatch, is_mllm=False, cache_mode=None)
+    monkeypatch.setattr(cli, "_resolve_audio_model_for_serve", lambda _name: None)
+
+    def reached_boot():
+        raise _ReachedPastVisionGuardError()
+
+    monkeypatch.setattr(_version_check, "prompt_upgrade_if_available", reached_boot)
+    args = _args("org/unknown-text")
+    for key, value in flags.items():
+        setattr(args, key, value)
+    with pytest.raises(_ReachedPastVisionGuardError):
+        cli.serve_command(args)
+    assert fetched == []
+
+
+def test_concurrent_config_probes_share_result(monkeypatch):
+    import concurrent.futures
+    import threading
+
+    from rapid_mlx import model_downloads, model_metadata
+    from rapid_mlx.api import utils
+
+    monkeypatch.setattr(utils, "_DEGRADE_CONFIG_PREFETCHED", set())
+    monkeypatch.setattr(utils, "_DEGRADE_CONFIG_ATTEMPTS", {})
+    monkeypatch.setattr(utils, "_DEGRADE_CONFIG_INFLIGHT", {})
+    monkeypatch.setattr(model_metadata, "hub_offline_mode_active", lambda: False)
+    entered, release = threading.Event(), threading.Event()
+    state = {"ready": False, "calls": 0}
+    monkeypatch.setattr(
+        utils,
+        "read_model_metadata",
+        lambda _: _meta({"model_type": "lfm3_vl"}) if state["ready"] else None,
+    )
+
+    def download(*args, **kwargs):
+        state["calls"] += 1
+        entered.set()
+        assert release.wait(5)
+        state["ready"] = True
+
+    monkeypatch.setattr(model_downloads, "hf_hub_download", download)
+    with concurrent.futures.ThreadPoolExecutor(2) as pool:
+        first = pool.submit(utils._prefetch_config_for_degrade_probe, "org/concurrent")
+        assert entered.wait(5)
+        second = pool.submit(utils._prefetch_config_for_degrade_probe, "org/concurrent")
+        release.set()
+        assert first.result() and second.result()
+    assert state["calls"] == 1

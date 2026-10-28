@@ -89,6 +89,8 @@ def _dynamic_vision_size_values(processor: Any) -> dict[str, int] | None:
 
 
 def _supports_dynamic_vision_bounds(processor: Any) -> bool:
+    if getattr(processor, "native_media_backend", None) == "lfm3_vl":
+        return True
     image_processor = getattr(processor, "image_processor", None)
     native_min = getattr(image_processor, "min_pixels", None)
     native_max = getattr(image_processor, "max_pixels", None)
@@ -621,14 +623,11 @@ def _singleton_regular_cache_leaves(
     from .models.mlx_vlm_vendored.cache import ArraysCache, KVCache
 
     qualified: tuple[type, ...] = (KVCache, ArraysCache)
-    try:
-        from mlx_vlm.models.cache import ArraysCache as VLMArraysCache
-        from mlx_vlm.models.cache import KVCache as VLMKVCache
-
-        qualified += (VLMArraysCache, VLMKVCache)
-    except ImportError:
-        # mlx-vlm is optional; hybrid backbones then cannot occur either.
-        pass
+    # A leaf from this namespace implies its module is already loaded. Do not
+    # import the optional runtime just to recognize native cache objects.
+    vlm_cache = sys.modules.get("mlx_vlm.models.cache")
+    if vlm_cache is not None:
+        qualified += (vlm_cache.ArraysCache, vlm_cache.KVCache)
     # Preserve the lane's existing degraded-import contract: tests and partial
     # installs can still operate on upstream/vendored leaves when the separate
     # mlx-lm cache module is unavailable. When present, BOTH regular leaf types
@@ -662,14 +661,10 @@ def _extract_detached_singleton_leaf(leaf: Any, idx: int) -> Any:
     # class objects; recognize those too until step 3 unifies the types.
     # VENDOR-DEVIATION(dual-namespace): upstream recognition is transitional;
     # one mechanical revert restores byte-verbatim once step 3 unifies types.
-    try:
-        from mlx_vlm.models.cache import ArraysCache as VLMArraysCache
-        from mlx_vlm.models.cache import KVCache as VLMKVCache
-
-        arrays_types += (VLMArraysCache,)
-        kv_types += (VLMKVCache,)
-    except ImportError:
-        pass
+    vlm_cache = sys.modules.get("mlx_vlm.models.cache")
+    if vlm_cache is not None:
+        arrays_types += (vlm_cache.ArraysCache,)
+        kv_types += (vlm_cache.KVCache,)
     try:
         from mlx_lm.models.cache import ArraysCache as LMArraysCache
         from mlx_lm.models.cache import KVCache as LMKVCache
@@ -771,9 +766,14 @@ def _batched_leaf_types() -> tuple[tuple[type, ...], tuple[type, ...]]:
     list_types: tuple[type, ...] = (CacheList,)
     batch_kv_types: tuple[type, ...] = (BatchKVCache,)
     for module_name in ("mlx_vlm.models.cache", "mlx_lm.models.cache"):
-        try:
-            module = importlib.import_module(module_name)
-        except ImportError:
+        if module_name.startswith("mlx_vlm."):
+            module = sys.modules.get(module_name)
+        else:
+            try:
+                module = importlib.import_module(module_name)
+            except ImportError:
+                continue
+        if module is None:
             continue
         list_types += (module.CacheList,)
         batch_kv_types += (module.BatchKVCache,)
@@ -1302,6 +1302,13 @@ class MLLMBatchGenerator:
                 max sequences, prefill batch, and completion batch are all 1.
                 Media-boundary reuse stays disabled without this proof.
         """
+        native_lfm3 = (
+            getattr(getattr(model, "config", None), "model_type", None) == "lfm3_vl"
+        )
+        if native_lfm3:
+            enable_prefix_cache = False
+            enable_vision_cache = False
+            media_prefix_cache = "off"
         if singleton_fastpath not in ("auto", "off"):
             raise ValueError(
                 f"singleton_fastpath must be 'auto' or 'off', "
@@ -3531,7 +3538,14 @@ class MLLMBatchGenerator:
             return
 
         tic = time.perf_counter()
-        from rapid_mlx.models.mlx_vlm_vendored.inputs import prepare_inputs
+        native_lfm3 = (
+            getattr(getattr(self.model, "config", None), "model_type", None)
+            == "lfm3_vl"
+        )
+        if not native_lfm3:
+            from rapid_mlx.models.mlx_vlm_vendored.inputs import prepare_inputs
+        if native_lfm3 and request.videos:
+            raise ClientRequestError("Video is not supported by LFM3-VL")
 
         if request.images:
             from .models.mllm import FileSizeExceededError, process_image_input
@@ -3744,17 +3758,33 @@ class MLLMBatchGenerator:
         )
         try:
             for _ in range(2):
-                with _temporary_vision_pixel_bounds(
-                    self.processor,
-                    self.vision_min_pixels,
-                    pixel_cap,
-                ):
-                    inputs = prepare_inputs(
+                if native_lfm3:
+                    from contextlib import ExitStack
+
+                    from PIL import Image
+
+                    with ExitStack() as stack:
+                        images = [
+                            stack.enter_context(Image.open(path)) for path in all_images
+                        ]
+                        inputs = self.processor.prepare_inputs(
+                            request.prompt,
+                            images,
+                            min_pixels=self.vision_min_pixels or 65_536,
+                            max_pixels=pixel_cap or None,
+                        )
+                else:
+                    with _temporary_vision_pixel_bounds(
                         self.processor,
-                        images=all_images if all_images else None,
-                        prompts=request.prompt,
-                        image_token_index=image_token_index,
-                    )
+                        self.vision_min_pixels,
+                        pixel_cap,
+                    ):
+                        inputs = prepare_inputs(
+                            self.processor,
+                            images=all_images if all_images else None,
+                            prompts=request.prompt,
+                            image_token_index=image_token_index,
+                        )
                 token_count = getattr(inputs.get("input_ids"), "size", None)
                 if (
                     not pixel_cap
