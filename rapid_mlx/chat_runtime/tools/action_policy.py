@@ -6,7 +6,6 @@ from __future__ import annotations
 import ast
 import os
 import re
-import shlex
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -85,14 +84,6 @@ RULES = (
         "Remote code execution",
     ),
     (
-        r"\b(?:curl|wget)\b[^\n]*(?:--data|--form|--upload|--post|--body|--json|\s-[a-zA-Z]*[dFT]\b)",
-        "Network upload",
-    ),
-    (
-        r"\b(?:scp|sftp|rsync|nc|ncat|netcat|socat|ssh)\b",
-        "Network transfer or remote execution",
-    ),
-    (
         r"\b(?:eval|exec|source)\b|\b(?:sh|bash|zsh|dash|perl|ruby|node)\s+.*",
         "Indirect code execution",
     ),
@@ -129,6 +120,100 @@ RULES = (
 COMPILED_RULES = [
     (re.compile(pattern, re.I | re.S), reason) for pattern, reason in RULES
 ]
+
+NETWORK_CLIENTS = {
+    "curl",
+    "wget",
+    "nc",
+    "ncat",
+    "netcat",
+    "socat",
+    "ssh",
+    "scp",
+    "sftp",
+    "rsync",
+    "ftp",
+    "http",
+    "https",
+}
+
+
+SHELL_OPERATOR_CHARS = ";&|<>()\n"
+# Multi-character shell operators, longest first; anything else is one char.
+SHELL_OPERATORS = sorted(
+    ["&&", "||", ";;", "|&", ">>", "<<<", "<<", ">&", "<&", "&>>", "&>", ">|", "<>"],
+    key=len,
+    reverse=True,
+)
+
+
+def shell_words(text):
+    """Split POSIX shell text into (word, is_operator) pairs.
+
+    Unlike shlex, this keeps whether punctuation was unquoted, so a quoted or
+    escaped ``;`` is an argument rather than a command separator. Command
+    substitution needs no handling here: the dynamic expansion rule prompts.
+    """
+
+    words = []
+    word = []
+    started = False
+    quote = None
+    index = 0
+
+    def flush():
+        nonlocal started
+        if started:
+            words.append(("".join(word), False))
+        word.clear()
+        started = False
+
+    while index < len(text):
+        char = text[index]
+        if quote == "'":
+            if char == "'":
+                quote = None
+            else:
+                word.append(char)
+        elif quote == '"':
+            if char == '"':
+                quote = None
+            elif char == "\\" and text[index + 1 : index + 2] in {'"', "\\", "$", "`"}:
+                index += 1
+                word.append(text[index])
+            else:
+                word.append(char)
+        elif char == "\\":
+            if index + 1 >= len(text):
+                raise ValueError("trailing escape")
+            index += 1
+            word.append(text[index])
+            started = True
+        elif char in "'\"":
+            quote = char
+            started = True
+        elif char in " \t\r":
+            flush()
+        elif char == "#" and not started:
+            while index < len(text) and text[index] != "\n":
+                index += 1
+            continue
+        elif char in SHELL_OPERATOR_CHARS:
+            flush()
+            end = index + next(
+                (len(op) for op in SHELL_OPERATORS if text.startswith(op, index)), 1
+            )
+            words.append((text[index:end], True))
+            index = end
+            continue
+        else:
+            word.append(char)
+            started = True
+        index += 1
+    if quote:
+        raise ValueError("unterminated quote")
+    flush()
+    return words
 
 
 def scan_code(text, workspace, *, python=False):
@@ -171,11 +256,131 @@ def scan_code(text, workspace, *, python=False):
                         return "Code path could not be inspected"
         return None
     try:
-        lexer = shlex.shlex(normalized, posix=True, punctuation_chars=";&|<>()")
-        lexer.whitespace_split = True
-        tokens = list(lexer)
+        words = shell_words(normalized)
     except ValueError:
         return "Shell quoting could not be inspected"
+    tokens = [token for token, _ in words]
+    operators = [operator for _, operator in words]
+
+    def starts_command(index):
+        return index == 0 or (
+            operators[index - 1]
+            and all(char in ";&|()\n" for char in tokens[index - 1])
+        )
+
+    def is_lookup(index):
+        previous = tokens[index - 1] if index else ""
+        if previous in {"which", "type"}:
+            return starts_command(index - 1)
+        return (
+            previous in {"-v", "-V"}
+            and index >= 2
+            and tokens[index - 2] == "command"
+            and starts_command(index - 2)
+        )
+
+    # Backstop for shell forms the command-position walk below cannot model
+    # (compound commands, exec, sudo, env options, option terminators).
+    # Quoting does not stop a shell from running a name, so any client name
+    # needs approval unless it is the operand of a lookup that starts a command.
+    for index, (token, operator) in enumerate(words):
+        if (
+            not operator
+            and Path(token).name.lower() in NETWORK_CLIENTS
+            and not is_lookup(index)
+        ):
+            return "Network client"
+    command_start = True
+    wrapper = None
+    skip_operand = False
+    for index, token in enumerate(tokens):
+        if operators[index] and all(char in ";&|()\n" for char in token):
+            command_start = True
+            wrapper = None
+            skip_operand = False
+        elif command_start:
+            if (
+                token.isdigit()
+                and index + 1 < len(tokens)
+                and operators[index + 1]
+                and tokens[index + 1][0] in "<>"
+            ):
+                return "Shell redirection before command"
+            if (
+                operators[index]
+                and all(char in "<>&|" for char in token)
+                and ("<" in token or ">" in token)
+            ):
+                return "Shell redirection before command"
+            if skip_operand:
+                skip_operand = False
+                continue
+            if wrapper == "command" and token in {"-v", "-V"}:
+                command_start = False
+                continue
+            # A glob or brace pattern in command position expands to a name
+            # the checks here never see (c[u]rl, {c,}url).
+            if (
+                token not in {"[", "[["}
+                and not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*\+?=.*", token)
+                and re.search(r"[*?[]|\{.*(?:,|\.\.).*\}", token)
+            ):
+                return "Dynamic shell expansion"
+            name = Path(token).name.lower()
+            if wrapper and token.startswith(("-S", "--split-string")):
+                return "Indirect command execution"
+            if wrapper and token.startswith("-"):
+                if wrapper == "env":
+                    if token in {"-u", "--unset", "-C", "--chdir", "-a", "--argv0"}:
+                        skip_operand = True
+                    elif token not in {
+                        "--",
+                        "-i",
+                        "--ignore-environment",
+                        "-0",
+                        "--null",
+                    } and not token.startswith(
+                        ("-u", "-C", "-a", "--unset=", "--chdir=", "--argv0=")
+                    ):
+                        return "Indirect command execution"
+                continue
+            if name in {
+                "xargs",
+                "timeout",
+                "nice",
+                "nohup",
+                "stdbuf",
+                "time",
+                "builtin",
+                "coproc",
+                "function",
+                "setsid",
+                "chroot",
+                "chrt",
+                "taskset",
+                "runuser",
+                "strace",
+            }:
+                return "Indirect command execution"
+            if name in {"env", "command", "busybox", "toybox"}:
+                wrapper = name
+            elif token in {
+                "if",
+                "then",
+                "else",
+                "elif",
+                "while",
+                "until",
+                "do",
+                "!",
+                "{",
+            }:
+                continue
+            elif not (
+                token.startswith("-")
+                or re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*\+?=.*", token)
+            ):
+                command_start = False
     for token in tokens:
         if secret_path(token):
             return "Secrets-like path or credential access"
