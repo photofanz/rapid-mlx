@@ -5,6 +5,7 @@ import asyncio
 import json
 import os
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -435,6 +436,47 @@ async def test_workers_cannot_import_from_untrusted_cwd(tmp_path, monkeypatch):
     )
     assert result["text"] == "plain attachment"
     assert not marker.exists()
+
+
+async def test_workers_import_from_a_runtime_without_site_packages(
+    tmp_path, monkeypatch
+):
+    # The bundled runtime finds rapid_mlx and its dependencies in one
+    # directory through PYTHONPATH, which -I drops; -S reproduces an
+    # interpreter whose own site lacks them.
+    import PIL
+
+    import rapid_mlx
+
+    bundle = tmp_path / "site-packages"
+    bundle.mkdir()
+    for entry in Path(PIL.__file__).parents[1].iterdir():
+        if not entry.name.startswith(("rapid_mlx", "__editable__")):
+            (bundle / entry.name).symlink_to(entry)
+    (bundle / "rapid_mlx").symlink_to(Path(rapid_mlx.__file__).parent)
+    runtime = tmp_path / "python"
+    runtime.write_text(f'#!/bin/sh\nexec {sys.executable!r} -S "$@"\n')
+    runtime.chmod(0o755)
+    monkeypatch.setattr(file_worker.sys, "executable", str(runtime))
+    monkeypatch.setattr(file_worker, "_PACKAGE_ROOT", str(bundle))
+    write(tmp_path, "fact.txt", "bundled read")
+    result = await file_worker.run_worker(
+        "rapid_mlx.chat_runtime.file_operations",
+        json.dumps(
+            {
+                "operation": "read_file",
+                "workspace": str(tmp_path),
+                "args": {"path": "fact.txt"},
+            }
+        ).encode(),
+    )
+    assert "bundled read" in result["content"]
+    result = await file_worker.run_worker(
+        "rapid_mlx.chat_runtime.file_extraction",
+        b"plain attachment",
+        arguments=("note.txt",),
+    )
+    assert result["text"] == "plain attachment"
 
 
 async def test_parallel_reads_share_context_budget(tmp_path):
