@@ -92,15 +92,22 @@ _MODEL_PATTERNS: list[tuple[re.Pattern, ModelConfig]] = [
             supports_spec_decode=False,
         ),
     ),
+    # DeepSeek V4.1 keeps its previous parser; the original V4 DSML parser
+    # below is verified only for V4 checkpoints.
+    (
+        re.compile(r"deepseek.*v4[._-]?1(?!\d)", re.IGNORECASE),
+        ModelConfig(
+            tool_call_parser="deepseek",
+            reasoning_parser="deepseek_v4",
+        ),
+    ),
     # DeepSeek V4 / V4-Flash — sparse MoE with sliding-window attention
     # (RotatingKVCache). Pure-attention so spec decode is safe; tool
-    # parser inherits the standard DeepSeek format. Upstream chat
-    # template is currently chat-only with no tools (see deepseek-ai
-    # discussion #16) — when fixed, just bump the parser here.
+    # parser uses the original V4 DSML wire format.
     (
         re.compile(r"deepseek.*v4", re.IGNORECASE),
         ModelConfig(
-            tool_call_parser="deepseek",
+            tool_call_parser="deepseek_v4_flash",
             reasoning_parser="deepseek_v4",
         ),
     ),

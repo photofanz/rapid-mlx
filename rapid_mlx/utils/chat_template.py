@@ -2493,6 +2493,12 @@ def _render_chat_template(
     from .deepseek_v4_0731 import encode_messages, is_deepseek_v4_0731
 
     is_deepseek_v4 = is_deepseek_v4_0731(model_name)
+    # Original V4 checkpoints only; V4.1 and 0731 have their own templates.
+    is_original_v4 = (
+        re.search(r"deepseek.*v4(?![._-]?1(?!\d))", model_name, re.IGNORECASE)
+        is not None
+        and not is_deepseek_v4
+    )
 
     # F-111: flatten text-only OpenAI-o1+ content arrays
     # (``content: [{"type":"text","text":"X"}]``) into the plain string
@@ -2536,7 +2542,7 @@ def _render_chat_template(
         messages = _sanitize_messages_for_template(
             messages,
             template_applicator,
-            include_reasoning_sentinels=is_deepseek_v4,
+            include_reasoning_sentinels=is_deepseek_v4 or is_original_v4,
         )
     except Exception as e:
         logger.debug(
@@ -2553,7 +2559,7 @@ def _render_chat_template(
         tools = _sanitize_tools_for_template(
             tools,
             template_applicator,
-            include_reasoning_sentinels=is_deepseek_v4,
+            include_reasoning_sentinels=is_deepseek_v4 or is_original_v4,
         )
     except Exception as e:
         logger.debug(
@@ -2583,6 +2589,48 @@ def _render_chat_template(
             enable_thinking=enable_thinking is not False,
             add_generation_prompt=add_generation_prompt,
         )
+
+    if is_original_v4:
+        import copy
+        import json
+
+        from .deepseek_v4_flash import encode_messages as encode_original
+
+        work = copy.deepcopy(messages)
+        # OpenAI's developer role carries system instructions; the native
+        # encoder drops developer turns before the final request turn.
+        final_turn = max(
+            (i for i, m in enumerate(work) if m.get("role") in {"user", "developer"}),
+            default=-1,
+        )
+        for index, message in enumerate(work):
+            if message.get("role") == "developer" and index < final_turn:
+                message["role"] = "system"
+        if tools:
+            if not work or work[0].get("role") != "system":
+                work.insert(0, {"role": "system", "content": ""})
+            work[0]["tools"] = tools
+        for message in work:
+            for call in message.get("tool_calls") or []:
+                arguments = call["function"].get("arguments")
+                if not isinstance(arguments, str):
+                    call["function"]["arguments"] = json.dumps(
+                        arguments, ensure_ascii=False
+                    )
+        prompt = encode_original(
+            work, thinking_mode="thinking" if enable_thinking is not False else "chat"
+        )
+        if (
+            not add_generation_prompt
+            and work
+            and work[-1].get("role") in {"user", "developer", "tool"}
+        ):
+            suffix = "<｜Assistant｜>" + (
+                "<think>" if enable_thinking is not False else "</think>"
+            )
+            if prompt.endswith(suffix):
+                prompt = prompt[: -len(suffix)]
+        return prompt
 
     if not hasattr(template_applicator, "apply_chat_template"):
         # Fallback for models without apply_chat_template.
